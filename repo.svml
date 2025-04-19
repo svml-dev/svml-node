@@ -1,0 +1,13 @@
+==SVML-LIBRARY==
+L1{
+  index.js <-> SvmlClient
+  package.json -> npm packaging
+  README.md -> docs
+  repo.svml -> architecture contract
+  test/ > [client.test.js]
+}
+L2{
+  endpoints := [auth, validate, correct, generate, compare, refine]
+  index.js <-> api.svml.dev, auth.svml.dev
+  principles > [DRY, modularity, extensibility]
+} 
