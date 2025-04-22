@@ -1,4 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
+import { generate, GenerateParams } from './endpoints/generate';
+import { compare, CompareParams } from './endpoints/compare';
 
 export interface SvmlClientOptions {
   authURL?: string;
@@ -8,12 +10,6 @@ export interface SvmlClientOptions {
 
 const PROD_AUTH_URL = 'https://auth.svml.dev';
 const PROD_API_URL = 'https://api.svml.dev';
-
-export interface GenerateParams {
-  context: string;
-  svml_version: string;
-  model: string;
-}
 
 export class SvmlClient {
   public readonly apiBase: string;
@@ -79,7 +75,7 @@ export class SvmlClient {
     } catch (error: any) {
       this.authorized = false;
       throw new Error(
-        `Authentication failed: ${error.response?.data?.detail || error.message}`
+        `Authorization failed: ${error.response?.data?.detail || error.message}`
       );
     }
   }
@@ -114,16 +110,7 @@ export class SvmlClient {
   async generate(params: GenerateParams): Promise<any> {
     this.checkApiAuth();
     try {
-      const response = await this.api.post(
-        '/generate',
-        params,
-        {
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-          },
-        },
-      );
-      return response.data;
+      return await generate(this.api, this.accessToken as string, params);
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
         this.authorized = false;
@@ -133,4 +120,25 @@ export class SvmlClient {
       );
     }
   }
-} 
+
+  /**
+   * Calls the /compare endpoint. Requires authorization.
+   * @param params { svml_a, justifications_a, model_a, svml_b, justifications_b, model_b, context, svml_version, model }
+   * @returns The API response data.
+   */
+  async compare(params: CompareParams): Promise<any> {
+    this.checkApiAuth();
+    try {
+      return await compare(this.api, this.accessToken as string, params);
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        this.authorized = false;
+      }
+      throw new Error(
+        `Compare failed: ${error.response?.data?.detail || error.message}`
+      );
+    }
+  }
+}
+
+export { GenerateParams, CompareParams }; 

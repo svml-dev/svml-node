@@ -1,13 +1,19 @@
 ==SVML-LIBRARY==
 L1{
-  index.js <-> SvmlClient
+  index.ts <-> SvmlClient
   package.json -> npm packaging
   README.md -> docs
   repo.svml -> architecture contract
-  test/ > [client.test.js]
+  endpoints/ > [generate.ts]
+  test/ > [client.test.ts, cache.local.json, test-output.local.json, env.local.json]
+  tsconfig.json -> typescript_config
+  .eslintrc.js, eslint.config.mjs -> linting
+  .prettierrc -> formatting
 }
 L2{
-  endpoints := [auth, validate, correct, generate, compare, refine]
-  index.js <-> api.svml.dev, auth.svml.dev
-  principles > [DRY, modularity, extensibility]
+  endpoints := [generate] // implemented; [auth, validate, correct, compare, refine] // planned
+  index.ts <-> api.svml.dev, auth.svml.dev
+  endpoints/ -> modular_endpoint_strategy
+  test/ -> [env_switching, jwt_caching, response_caching, output_persistence]
+  principles > [TypeScript, DRY, modularity, extensibility, reproducibility, clarity]
 } 
