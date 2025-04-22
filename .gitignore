@@ -1,15 +1,15 @@
-# Node modules
+# Node.js
 node_modules/
-
-# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # Dependency directories
 jspm_packages/
-
-# Optional npm cache directory
 .npm/
 
 # Optional eslint cache
@@ -18,13 +18,86 @@ jspm_packages/
 # Output of 'npm pack'
 *.tgz
 
-# IDE files
+# IDE/editor files
 .vscode/
 .idea/
 *.swp
+*.code-workspace
 
-# Coverage directory
+# Cursor AI
+.cursor/
+
+# Coverage
 coverage/
+.nyc_output/
 
-# Misc
-.DS_Store 
+# Mac system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Test output
+test-output/
+
+# Local environment config
+test/env.local.json
+test/cache.local.json
+test/test-output.local.json
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Dependency directories
+jspm_packages/
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# Output of 'npm pack'
+*.tgz
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.code-workspace
+
+# Cursor AI
+.cursor/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Mac system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Test output
+test-output/
+
+# Local environment config
+test/env.local.json
+test/cache.local.json
+test/test-output.local.json 
