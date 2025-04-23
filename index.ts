@@ -1,6 +1,20 @@
 import axios, { AxiosInstance } from 'axios';
 import { generate, GenerateParams } from './endpoints/generate';
-import { compare, CompareParams } from './endpoints/compare';
+import {
+  compare,
+  compareSVML,
+  compareFromGenerate,
+  CompareSVMLParams,
+  CompareFromGenerateParams
+} from './endpoints/compare';
+import {
+  refine,
+  refineFromGenerate,
+  refineFromCompare,
+  RefineSVMLParams,
+  RefineFromGenerateParams,
+  RefineFromCompareParams
+} from './endpoints/refine';
 
 export interface SvmlClientOptions {
   authURL?: string;
@@ -122,23 +136,126 @@ export class SvmlClient {
   }
 
   /**
-   * Calls the /compare endpoint. Requires authorization.
-   * @param params { svml_a, justifications_a, model_a, svml_b, justifications_b, model_b, context, svml_version, model }
-   * @returns The API response data.
+   * Calls the /compare endpoint for direct SVML comparison.
    */
-  async compare(params: CompareParams): Promise<any> {
+  async compareSVML(params: CompareSVMLParams): Promise<any> {
     this.checkApiAuth();
     try {
-      return await compare(this.api, this.accessToken as string, params);
+      return await compareSVML(this.api, this.accessToken as string, params);
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
         this.authorized = false;
       }
       throw new Error(
-        `Compare failed: ${error.response?.data?.detail || error.message}`
+        `CompareSVML failed: ${error.response?.data?.detail || error.message}`
       );
+    }
+  }
+
+  /**
+   * Calls the /compare endpoint for comparison from two generate outputs.
+   */
+  async compareFromGenerate(params: CompareFromGenerateParams): Promise<any> {
+    this.checkApiAuth();
+    try {
+      return await compareFromGenerate(this.api, this.accessToken as string, params);
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        this.authorized = false;
+      }
+      throw new Error(
+        `CompareFromGenerate failed: ${error.response?.data?.detail || error.message}`
+      );
+    }
+  }
+
+  /**
+   * @deprecated Use compareSVML or compareFromGenerate instead.
+   */
+  async compare(params: any): Promise<any> {
+    // For backward compatibility, try to dispatch to the correct method
+    if ((params as any).svml_a && (params as any).svml_b) {
+      return this.compareSVML(params as CompareSVMLParams);
+    } else if ((params as any).generate_api_output_a && (params as any).generate_api_output_b) {
+      return this.compareFromGenerate(params as CompareFromGenerateParams);
+    } else {
+      throw new Error('Invalid compare params');
+    }
+  }
+
+  /**
+   * Calls the /refine endpoint for direct SVML refinement.
+   */
+  async refineSVML(params: RefineSVMLParams): Promise<any> {
+    this.checkApiAuth();
+    try {
+      return await refine(this.api, this.accessToken as string, params);
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        this.authorized = false;
+      }
+      throw new Error(
+        `RefineSVML failed: ${error.response?.data?.detail || error.message}`
+      );
+    }
+  }
+
+  /**
+   * Calls the /refine endpoint for refinement from /generate output.
+   */
+  async refineFromGenerate(params: RefineFromGenerateParams): Promise<any> {
+    this.checkApiAuth();
+    try {
+      return await refineFromGenerate(this.api, this.accessToken as string, params);
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        this.authorized = false;
+      }
+      throw new Error(
+        `RefineFromGenerate failed: ${error.response?.data?.detail || error.message}`
+      );
+    }
+  }
+
+  /**
+   * Calls the /refine endpoint for refinement from /compare output.
+   */
+  async refineFromCompare(params: RefineFromCompareParams): Promise<any> {
+    this.checkApiAuth();
+    try {
+      return await refineFromCompare(this.api, this.accessToken as string, params);
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        this.authorized = false;
+      }
+      throw new Error(
+        `RefineFromCompare failed: ${error.response?.data?.detail || error.message}`
+      );
+    }
+  }
+
+  /**
+   * @deprecated Use refineSVML, refineFromGenerate, or refineFromCompare instead.
+   */
+  async refine(params: RefineSVMLParams | RefineFromGenerateParams | RefineFromCompareParams): Promise<any> {
+    // For backward compatibility, try to dispatch to the correct method
+    if ((params as any).svml) {
+      return this.refineSVML(params as RefineSVMLParams);
+    } else if ((params as any).generate_api_output) {
+      return this.refineFromGenerate(params as RefineFromGenerateParams);
+    } else if ((params as any).compare_api_output) {
+      return this.refineFromCompare(params as RefineFromCompareParams);
+    } else {
+      throw new Error('Invalid refine params');
     }
   }
 }
 
-export { GenerateParams, CompareParams }; 
+export {
+  GenerateParams,
+  CompareSVMLParams,
+  CompareFromGenerateParams,
+  RefineSVMLParams,
+  RefineFromGenerateParams,
+  RefineFromCompareParams
+}; 

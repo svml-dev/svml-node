@@ -1,7 +1,8 @@
-import { SvmlClient, CompareParams } from '../index';
+import { SvmlClient, CompareSVMLParams, CompareFromGenerateParams } from '../index';
 import envs from './env.local.json';
 import fs from 'fs';
 import path from 'path';
+import { test_cache } from './client.test';
 
 const cachePath = path.join(__dirname, 'cache.local.json');
 let cache: Record<string, any> = {};
@@ -42,6 +43,9 @@ describe('SvmlClient compare', () => {
   const original_context = 'Compare the following SVML representations.';
 
   it('should call /compare with SVML and justifications', async () => {
+    if (test_cache.compare) {
+      return;
+    }
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
@@ -54,7 +58,7 @@ describe('SvmlClient compare', () => {
       cache.auth_jwt = client.token;
       saveCache();
     }
-    const params: CompareParams = {
+    const params: CompareSVMLParams = {
       svml_a,
       justifications_a,
       model_a,
@@ -65,8 +69,10 @@ describe('SvmlClient compare', () => {
       svml_version,
       model,
     };
-    const result = await client.compare(params);
+    const result = await client.compareSVML(params);
     saveTestOutput('compare_with_justifications', result);
+    cache.compare_api_output = result;
+    saveCache();
     expect(result).toBeDefined();
     expect(result.output).toBeDefined();
     expect(result.output.analysis_a).toBeDefined();
@@ -76,6 +82,9 @@ describe('SvmlClient compare', () => {
   });
 
   it('should call /compare with only SVML', async () => {
+    if (test_cache.compare) {
+      return;
+    }
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
@@ -88,7 +97,7 @@ describe('SvmlClient compare', () => {
       cache.auth_jwt = client.token;
       saveCache();
     }
-    const params: CompareParams = {
+    const params: CompareSVMLParams = {
       svml_a,
       svml_b,
       model_a,
@@ -97,8 +106,45 @@ describe('SvmlClient compare', () => {
       svml_version,
       model,
     };
-    const result = await client.compare(params);
+    const result = await client.compareSVML(params);
     saveTestOutput('compare_svml_only', result);
+    cache.compare_svml_only = result;
+    saveCache();
+    expect(result).toBeDefined();
+    expect(result.output).toBeDefined();
+    expect(result.output.analysis_a).toBeDefined();
+    expect(result.output.analysis_b).toBeDefined();
+    expect(result.metadata).toBeDefined();
+    expect(result.svml_tokens).toBeDefined();
+  });
+
+  it('should call /compare with two generate outputs', async () => {
+    if (test_cache.compare) {
+      return;
+    }
+    const client = new SvmlClient(apiKey, {
+      authURL: envs.dev.authURL,
+      apiURL: envs.dev.apiURL,
+    });
+    if (cache.auth_jwt) {
+      (client as any).accessToken = cache.auth_jwt;
+      (client as any).authorized = true;
+    } else {
+      await client.authenticate();
+      cache.auth_jwt = client.token;
+      saveCache();
+    }
+    const params: CompareFromGenerateParams = {
+      generate_api_output_a: cache.generate_1,
+      generate_api_output_b: cache.generate_2,
+      original_context,
+      svml_version,
+      model,
+    };
+    const result = await client.compareFromGenerate(params);
+    saveTestOutput('compare_generate_outputs', result);
+    cache.compare_generate_outputs = result;
+    saveCache();
     expect(result).toBeDefined();
     expect(result.output).toBeDefined();
     expect(result.output.analysis_a).toBeDefined();

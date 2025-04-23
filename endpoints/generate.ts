@@ -20,6 +20,6 @@ export async function generate(
       },
     },
   );
-  console.log('response.data', response.data);
+  //console.log('generate response.data', response.data);
   return response.data;
 } 

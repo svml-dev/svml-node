@@ -20,11 +20,12 @@ function saveTestOutput(key: string, value: any) {
   fs.writeFileSync(testOutputPath, JSON.stringify(testOutput, null, 2));
 }
 
-const test_cache = {
-  auth: 1, // 1 = use cached JWT if present, 0 = always call API
+export const test_cache = {
+  auth: 0, // 1 = use cached JWT if present, 0 = always call API
   generate_1: 1, // 1 = use cached response if present, 0 = always call API
   generate_2: 1, // 1 = use cached response if present, 0 = always call API
-  compare: 0, // 1 = use cached response if present, 0 = always call API
+  compare: 1, // 1 = use cached response if present, 0 = always call API
+  refine: 0, // 1 = use cached response if present, 0 = always call API
 };
 
 function saveCache() {
