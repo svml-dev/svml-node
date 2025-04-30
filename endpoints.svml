@@ -1,0 +1,101 @@
+==SVML-API-ENDPOINTS==
+--coherence:high--
+%ANALYTICAL+EXPLANATORY%
+
+// Each endpoint is described as a frame for clarity and modularity.
+// For /analyze, supported dimensions are listed explicitly.
+
+#svml_api_endpoints#{
+  frame:validate{
+    // Endpoint: /validate
+    validate.py <-> /v1/validate
+    handler: validate_handler.py
+    logic: syntax_validator.py, concept_validator.py
+    input: { svml: string, svml_version: string, model: string }
+    output: {
+      syntax_violations: [ { line, type, detail, suggestion } ],
+      conceptual_violations: [ { dimension, score, evidence, finding } ],
+      error: string (optional)
+    }
+    notes: "Performs SVML syntax validation (using syntax_validator.py) and conceptual validation (using concept_validator.py). Returns detailed violation lists. Uses static and LLM-based checks."
+  }
+  frame:generate{
+    // Endpoint: /generate
+    generate.py <-> /v1/generate
+    handler: generate_handler.py
+    logic: LLM prompt-driven, SVML structure generation
+    input: { context: string, svml_version: string, model: string }
+    output: {
+      svml: string (escaped in <svml>),
+      justifications: [string],
+      error: string (optional)
+    }
+    notes: "Generates new SVML from natural language context. Uses prompt with <output_format> block specifying XML structure. Escapes SVML in XML. Returns both SVML and LLM justifications."
+  }
+  frame:refine{
+    // Endpoint: /refine
+    refine.py <-> /v1/refine
+    handler: refine_handler.py
+    logic: LLM prompt-driven, SVML improvement
+    input: { svml: string, svml_version: string, model: string, user_additional_context: string (optional) }
+    output: {
+      svml: string (refined, escaped in <svml>),
+      analysis: string,
+      improvements: string,
+      error: string (optional)
+    }
+    notes: "Refines or improves existing SVML. Uses prompt with SVML guidance and <output_format> block. Handles ambiguity, structure, and clarity improvements. Escapes SVML in XML."
+  }
+  frame:analyze{
+    // Endpoint: /analyze
+    analyze.py <-> /v1/analyze
+    handler: analyze_handler.py
+    logic: concept_validator.py (prompt building), LLM, dynamic tag extraction
+    input: { svml: string, svml_version: string, model: string, dimensions: [string] (optional) }
+    output: {
+      dimensions: {
+        [dimension]: {
+          score: float,
+          primary_finding: string,
+          evidence: [string]
+        }
+      },
+      total_tokens: int,
+      errors: { [dimension]: string } (optional)
+    }
+    supported_dimensions: [
+      cognitive_divergence,
+      compression_signature,
+      metaphor_anchoring,
+      prompt_form_alignment,
+      author_trace,
+      ambiguity_resolution
+    ]
+    notes: "Performs multi-dimensional conceptual analysis of SVML. Each dimension uses a prompt with <output_format> XML. Handler dynamically extracts tags for escaping/unescaping. No per-dimension parsing logic; all is prompt-driven and generic. The 'dimensions' array can be used to request a subset of these dimensions."
+  }
+  frame:compare{
+    // Endpoint: /compare
+    compare.py <-> /v1/compare
+    handler: compare_handler.py
+    logic: LLM prompt-driven, SVML comparison
+    input: { original_context: string, svml_a: string, justifications_a: string, svml_b: string, justifications_b: string, svml_version: string, model: string }
+    output: {
+      analysis_a: {
+        strengths: string,
+        weaknesses: string,
+        score: float,
+        justifications: string,
+        suggestions: string
+      },
+      analysis_b: { ...same as above... },
+      error: string (optional)
+    }
+    notes: "Compares two SVML outputs for the same context. Uses prompt with <output_format> XML. Returns detailed analysis, scores, strengths, weaknesses, and suggestions for both A and B. Escapes SVML and justification fields."
+  }
+  frame:shared_patterns{
+    // Shared Patterns & Notes
+    pattern: "All endpoints use prompt-driven LLM logic with <output_format> XML blocks. Handlers dynamically extract tags for escaping/unescaping. All SVML content in XML is escaped for safety. No static tag lists; all tag extraction is dynamic."
+    extensibility: "Adding new dimensions or output fields only requires updating the prompt and output_format, not handler code."
+    error_handling: "All endpoints return an 'error' field if any step fails, for uniform downstream handling."
+  }
+}

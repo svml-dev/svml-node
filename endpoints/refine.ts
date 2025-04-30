@@ -27,11 +27,19 @@ export interface RefineFromCompareParams {
   svml_version?: string;
 }
 
+export interface RefineResponse {
+  request_id: string;
+  result: string;
+  metadata: Record<string, any>;
+  input: Record<string, any>;
+  output: Record<string, any>; // You can refine this if you know the output structure
+}
+
 export async function refine(
   api: AxiosInstance,
   token: string,
   params: RefineSVMLParams
-): Promise<any> {
+): Promise<RefineResponse> {
   const response = await api.post(
     '/refine',
     params,
@@ -48,7 +56,7 @@ export async function refineFromGenerate(
   api: AxiosInstance,
   token: string,
   params: RefineFromGenerateParams
-): Promise<any> {
+): Promise<RefineResponse> {
   const response = await api.post(
     '/refine',
     params,
@@ -65,7 +73,7 @@ export async function refineFromCompare(
   api: AxiosInstance,
   token: string,
   params: RefineFromCompareParams
-): Promise<any> {
+): Promise<RefineResponse> {
   const response = await api.post(
     '/refine',
     params,

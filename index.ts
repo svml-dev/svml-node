@@ -15,6 +15,12 @@ import {
   RefineFromGenerateParams,
   RefineFromCompareParams
 } from './endpoints/refine';
+import {
+  validate,
+  ValidateParams,
+  Violation,
+  ValidateResponse
+} from './endpoints/validate';
 
 export interface SvmlClientOptions {
   authURL?: string;
@@ -249,6 +255,23 @@ export class SvmlClient {
       throw new Error('Invalid refine params');
     }
   }
+
+  /**
+   * Calls the /validate endpoint for SVML syntax validation.
+   */
+  async validate(params: ValidateParams): Promise<ValidateResponse> {
+    this.checkApiAuth();
+    try {
+      return await validate(this.api, this.accessToken as string, params);
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        this.authorized = false;
+      }
+      throw new Error(
+        `Validate failed: ${error.response?.data?.detail || error.message}`
+      );
+    }
+  }
 }
 
 export {
@@ -257,5 +280,8 @@ export {
   CompareFromGenerateParams,
   RefineSVMLParams,
   RefineFromGenerateParams,
-  RefineFromCompareParams
+  RefineFromCompareParams,
+  ValidateParams,
+  Violation,
+  ValidateResponse
 }; 

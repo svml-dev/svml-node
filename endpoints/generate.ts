@@ -6,11 +6,19 @@ export interface GenerateParams {
   model: string;
 }
 
+export interface GenerateResponse {
+  request_id: string;
+  result: string;
+  metadata: Record<string, any>;
+  input: Record<string, any>;
+  output: Record<string, any>; // You can refine this if you know the output structure
+}
+
 export async function generate(
   api: AxiosInstance,
   token: string,
   params: GenerateParams
-): Promise<any> {
+): Promise<GenerateResponse> {
   const response = await api.post(
     '/generate',
     params,

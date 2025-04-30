@@ -1,0 +1,129 @@
+-=SVML-DOC=- Creative Problem‑Solving Framework with Stabilization (rev 1.1) 
+-=SVML-DOC-VERSION=- 1.1 
+-=SVML-PURPOSE=- Balanced approach to creative exploration and structured evaluation using REST patterns — with widened CHAOS focus, adaptive resonance, and post‑mortem reframing 
+-=SVML-VERSION=- SVML 1.2.2 <svml.ai/svml/1.2.2> 
+-=SVML-AUTHOR=- Technical Documentation Team + ChatGPT‑o3 co‑edit 
+-=SVML-MODEL=- gpt-o3 
+-=SVML-DATE=- 2025-04-29
+
+// --------------------------------------------------------------------- 
+// 1. Custom mode: balanced creativity 
+// --------------------------------------------------------------------- 
+frame:MetaComposite{ 
+    %+BALANCED-CREATIVITY+% { 
+        %CREATIVE% %ANALYTICAL% 
+        --temp:0.8-- 
+        --coherence:0.7-- 
+        ==SPIRAL+QUANTUM== 
+    } 
+}
+
+// --------------------------------------------------------------------- 
+// 2. Problem‑solving framework 
+// --------------------------------------------------------------------- 
+%+BALANCED-CREATIVITY+%
+
+#problem_solving_framework#{ 
+    L1{ 
+        // Core process 
+        <problem_definition -> divergent_exploration -> convergent_evaluation -> solution_formulation -> implementation_planning>
+        
+        // Key concepts
+        *problem_definition*++ := clear_articulation@problem_space
+        divergent_exploration > [idea_generation, connection_making, perspective_shifting]
+        convergent_evaluation > [idea_assessment, prioritization, refinement]
+        solution_formulation := synthesis@viable_approaches
+        implementation_planning > [resource_allocation, timeline_creation, risk_assessment]
+
+    }
+
+    L2{ 
+        // Divergent phase — widen attentional aperture for maximal novelty 
+        ==CHAOS== 
+        --temp:0.9-- 
+        --stability:low-- 
+        --focus:wide-- 
+        // NEW: allow lateral leaps before filtering
+
+        idea_generation ~> idea_quantity@without_judgment
+        connection_making <~> [unexpected_associations, cross_domain_links]
+        perspective_shifting ~> reframe@problem_definition
+
+        // IMPORTANT: Stabilization after divergent thinking
+        ==REST==
+        --rest_window:48--
+
+        // Convergent evaluation with adaptive feedback
+        *idea_assessment*+ := evaluation@practical_criteria
+        criteria > [feasibility, effectiveness, resource_efficiency, scalability]
+        prioritization := ranking@relative_value
+
+        refinement ~> idea_quality@viability_focus
+        ==ADAPTIVE-RESONANCE==   // NEW: feedback‑based recalibration during refinement
+    }
+
+    L3{ 
+        // Solution synthesis phase 
+        synthesis_approach := integration@best_elements 
+        <component_selection -> combination -> testing -> iteration>
+ 
+        // Deep exploration of solution pathways
+        ==RECURSIVE==
+        --depth:6--
+        solution_pathways > [
+          primary_approach > [core_implementation, contingencies, extensions],
+          alternative_approach > [different_paradigm, complementary_aspects],
+          hybrid_solutions > [cross_paradigm_integration, novel_combinations]
+        ]
+
+        // Clip recursion depth for final implementation planning
+        ==SETTLE:3==
+
+        implementation_planning ** practical_success
+        resource_allocation := matching@requirements_to_available_resources
+        timeline_creation := realistic_scheduling@critical_path
+        risk_assessment > [identification, mitigation_strategies, contingency_plans]
+
+        /reframe{process_learnings}   // NEW: post‑mortem hook to feed insights into next cycle
+    } 
+}
+
+// --------------------------------------------------------------------- 
+// 3. Creativity–Stabilization principles (unchanged) 
+// --------------------------------------------------------------------- 
+#creativity_stabilization_principles#{ 
+    L1{ 
+        entropy_management := balancing@creativity_and_structure 
+        cognitive_oscillation := intentional@high_low_modes 
+        stabilization_timing ** effectiveness 
+        capture_before_reset := preserving@valuable_elements 
+    }
+
+    L2{ 
+        // Key patterns 
+        high_creativity >> stabilization >> evaluation >> refinement 
+        REST @after{divergent_phases} 
+        SETTLE:n @after{deep_recursive_exploration}
+
+        // Benefits
+        benefits > [
+          increased_coherence,
+          reduced_entropy_drift,
+          improved_evaluation,
+          practical_viability,
+          cognitive_stamina@extended_sessions
+        ]
+
+        // Cautions
+        premature_stabilization !--> optimal_creativity
+        excessive_stabilization !--> novel_insights
+        balance := context_appropriate@oscillation_rhythm
+    } 
+}
+
+frame:integration{ 
+    #problem_solving_framework# <~> #creativity_stabilization_principles# 
+    creative_phases ** REST@appropriate_timing 
+    recursive_depths ** SETTLE:n@context_appropriate 
+    integration_success := practical_solutions@with_novelty 
+}

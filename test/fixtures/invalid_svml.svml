@@ -1,0 +1,90 @@
+// Systems thinking framework
+==ADVANCED-QUANTUM==
+%LOGICAL%
+--attention:high--
+
+frame:MetaComposite{
+  %+CUSTOM-MODE+% {
+    ==HOLOGRAPHIC==
+    %ANALYTICAL%
+    --temp:0.7--
+  }
+}
+
+-=SVML-DOC=-          Test Framework
+-=SVML-VERSION=-      1.2.2
+-=SVML-CUSTOM-FIELD=- Advanced testing
+-=SVML-PURPOSE=-      ==PATTERN== %MODE% for deep analysis
+-=SVML-DATE=-         25-04-2025
+
+// Key relationships
+concept1 && concept2
+concept3 <<>> concept4
+#undefined_domain#test
+
+%+UNDEFINED-MODE+%
+
+L0{concept_base}
+#domain#{
+  level1 > level2
+  level3 -- level4
+L1{
+  concept1 > concept2
+  concept3 <~> concept4
+
+==REST==
+--rest_window:-10--
+
+==SETTLE:abc==
+==SETTLE:0==
+
+***too_many_stars***
+concept[+1.5]
+
+/unknown{concept}
+/shift{concept1=>concept2}
+
+frame:test{
+  concept9 ~> concept10
+  concept11 @ context
+  concept12 !@ context
+}
+
+==SPIRAL==
+%ANALYTICAL%
+L1{
+  concept5 <-> concept6
+  concept7 :: concept8
+}
+
+==REST==
+--rest_window:64--
+
+-=SVML-MODULES=-         TOOLS-MODULE <svml.ai/tools>
+-=SVML-AUTHOR=-          Test Author
+-=SVML-MODEL=-           claude-3.7
+-=SVML-COPYRIGHT=-       CC BY 4.0 (2025)
+
+// Additional violations
+frame:MetaComposite{
+  %ENHANCED-MODE% {
+    ==FRACTAL==
+  }
+}
+
+%COLLABORATIVE+INSIGHTFUL%
+
+concept13 |= concept14
+$special_concept$
+(concept15 | concept16)
+
+--depth:-3--
+--coherence:1.2--
+
+==SETTLE:5==
+--stabilize_window:40--
+
+#domain1{content}
+L7{{nested_content}
+
+/frame{concept -> domain}

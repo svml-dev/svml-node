@@ -20,11 +20,19 @@ export interface CompareFromGenerateParams {
   model: string;
 }
 
+export interface CompareResponse {
+  request_id: string;
+  result: string;
+  metadata: Record<string, any>;
+  input: Record<string, any>;
+  output: Record<string, any>; // You can refine this if you know the output structure
+}
+
 export async function compareSVML(
   api: AxiosInstance,
   token: string,
   params: CompareSVMLParams
-): Promise<any> {
+): Promise<CompareResponse> {
   const response = await api.post(
     '/compare',
     params,
@@ -41,7 +49,7 @@ export async function compareFromGenerate(
   api: AxiosInstance,
   token: string,
   params: CompareFromGenerateParams
-): Promise<any> {
+): Promise<CompareResponse> {
   const response = await api.post(
     '/compare',
     params,
@@ -59,7 +67,7 @@ export async function compare(
   api: AxiosInstance,
   token: string,
   params: any
-): Promise<any> {
+): Promise<CompareResponse> {
   const response = await api.post(
     '/compare',
     params,
