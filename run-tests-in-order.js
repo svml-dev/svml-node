@@ -2,10 +2,10 @@ const { execSync } = require('child_process');
 
 // List your test files in the order you want them to run
 const testFiles = [
-  'test/client.test.ts',
-  // 'test/compare.test.ts',
-  // 'test/refine.test.ts',
-  // 'test/validate.test.ts',
+  'test/client.test.ts',  
+  'test/compare.test.ts',
+  'test/refine.test.ts',
+  'test/validate.test.ts',
   'test/correct.test.ts'
 ];
 

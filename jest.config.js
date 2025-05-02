@@ -4,5 +4,5 @@ module.exports = {
   transform: {
     "^.+\\.tsx?$": ["ts-jest",{}],
   },
-  testTimeout: 30000, // 30 seconds for long-running endpoint tests
+  testTimeout: 60000, // 60 seconds for long-running endpoint tests
 };
