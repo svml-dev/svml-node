@@ -1,21 +1,21 @@
 import { AxiosInstance } from 'axios';
 
 /**
- * Parameters for the /generate endpoint.
+ * Parameters for the /correct endpoint.
  */
-export interface GenerateParams {
-  /** The natural language context to generate SVML from. */
-  context: string;
-  /** The SVML version to use (e.g., '1.2.2'). */
+export interface CorrectParams {
+  /** The SVML string to correct. */
+  svml: string;
+  /** The SVML version to use. */
   svml_version: string;
-  /** The model to use for generation (e.g., 'gpt-4.1-mini'). */
+  /** The model to use for correction. */
   model: string;
 }
 
 /**
- * Response from the /generate endpoint.
+ * Response from the /correct endpoint.
  */
-export interface GenerateResponse {
+export interface CorrectResponse {
   request_id: string;
   result: string;
   metadata: Record<string, any>;
@@ -24,19 +24,19 @@ export interface GenerateResponse {
 }
 
 /**
- * Calls the /generate endpoint to generate SVML from context.
+ * Calls the /correct endpoint for SVML correction.
  * @param api AxiosInstance for the API
  * @param token Bearer token for authentication
- * @param params GenerateParams
+ * @param params CorrectParams
  * @returns The API response data
  */
-export async function generate(
+export async function correct(
   api: AxiosInstance,
   token: string,
-  params: GenerateParams
-): Promise<GenerateResponse> {
+  params: CorrectParams
+): Promise<CorrectResponse> {
   const response = await api.post(
-    '/generate',
+    '/correct',
     params,
     {
       headers: {
@@ -44,6 +44,6 @@ export async function generate(
       },
     },
   );
-  //console.log('generate response.data', response.data);
+  console.log(response.data);
   return response.data;
 } 

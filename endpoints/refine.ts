@@ -1,32 +1,56 @@
 import { AxiosInstance } from 'axios';
 
-// 1. For direct SVML refinement
+/**
+ * Parameters for direct SVML refinement via /refine endpoint.
+ */
 export interface RefineSVMLParams {
+  /** The SVML string to refine. */
   svml: string;
+  /** The original context for the SVML. */
   original_context: string;
+  /** Additional user context or instructions for refinement. */
   user_additional_context: string;
+  /** The model to use for refinement. */
   model: string;
+  /** The SVML version to use (optional). */
   svml_version?: string;
 }
 
-// 2. For refinement from /generate output
+/**
+ * Parameters for refinement from /generate output via /refine endpoint.
+ */
 export interface RefineFromGenerateParams {
+  /** The /generate endpoint output object. */
   generate_api_output: object;
+  /** The original context for the SVML. */
   original_context: string;
+  /** Additional user context or instructions for refinement. */
   user_additional_context: string;
+  /** The model to use for refinement. */
   model: string;
+  /** The SVML version to use (optional). */
   svml_version?: string;
 }
 
-// 3. For refinement from /compare output
+/**
+ * Parameters for refinement from /compare output via /refine endpoint.
+ */
 export interface RefineFromCompareParams {
+  /** The /compare endpoint output object. */
   compare_api_output: object;
+  /** The original context for the SVML. */
   original_context: string;
+  /** Additional user context or instructions for refinement (optional). */
   user_additional_context?: string;
+  /** The model to use for refinement. */
   model: string;
+  /** The SVML version to use (optional). */
   svml_version?: string;
 }
 
+/**
+ * Response from the /refine endpoint.
+ */
 export interface RefineResponse {
   request_id: string;
   result: string;
@@ -35,6 +59,13 @@ export interface RefineResponse {
   output: Record<string, any>; // You can refine this if you know the output structure
 }
 
+/**
+ * Calls the /refine endpoint for direct SVML refinement.
+ * @param api AxiosInstance for the API
+ * @param token Bearer token for authentication
+ * @param params RefineSVMLParams
+ * @returns The API response data
+ */
 export async function refine(
   api: AxiosInstance,
   token: string,
@@ -52,6 +83,13 @@ export async function refine(
   return response.data;
 }
 
+/**
+ * Calls the /refine endpoint for refinement from /generate output.
+ * @param api AxiosInstance for the API
+ * @param token Bearer token for authentication
+ * @param params RefineFromGenerateParams
+ * @returns The API response data
+ */
 export async function refineFromGenerate(
   api: AxiosInstance,
   token: string,
@@ -69,6 +107,13 @@ export async function refineFromGenerate(
   return response.data;
 }
 
+/**
+ * Calls the /refine endpoint for refinement from /compare output.
+ * @param api AxiosInstance for the API
+ * @param token Bearer token for authentication
+ * @param params RefineFromCompareParams
+ * @returns The API response data
+ */
 export async function refineFromCompare(
   api: AxiosInstance,
   token: string,

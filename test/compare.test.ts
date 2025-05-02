@@ -2,62 +2,34 @@ import { SvmlClient, CompareSVMLParams, CompareFromGenerateParams } from '../ind
 import envs from './env.local.json';
 import fs from 'fs';
 import path from 'path';
-import { test_cache } from './client.test';
 
-const cachePath = path.join(__dirname, 'cache.local.json');
-let cache: Record<string, any> = {};
-if (fs.existsSync(cachePath)) {
-  cache = JSON.parse(fs.readFileSync(cachePath, 'utf-8'));
-}
+// Load endpoint result fixtures
+const generate1 = require('./fixtures/generate_1.json');
+const generate2 = require('./fixtures/generate_2.json');
+const compareWithJustifications = require('./fixtures/compare_with_justifications.json');
+const compareSvmlOnly = require('./fixtures/compare_svml_only.json');
 
-const testOutputPath = path.join(__dirname, 'test-output.local.json');
-let testOutput: Record<string, any> = {};
-if (fs.existsSync(testOutputPath)) {
-  testOutput = JSON.parse(fs.readFileSync(testOutputPath, 'utf-8'));
-}
+const svml_a = generate1.output.svml;
+const justifications_a = generate1.output.justifications;
+const model_a = generate1.metadata.model;
 
-function saveTestOutput(key: string, value: any) {
-  testOutput[key] = value;
-  fs.writeFileSync(testOutputPath, JSON.stringify(testOutput, null, 2));
-}
+const svml_b = generate2.output.svml;
+const justifications_b = generate2.output.justifications;
+const model_b = generate2.metadata.model;
 
-function saveCache() {
-  fs.writeFileSync(cachePath, JSON.stringify(cache, null, 2));
-}
-
-const generate1 = cache.generate_1 || {};
-const generate2 = cache.generate_2 || {};
-
-const svml_a = generate1.output?.svml || 'SVML A content';
-const justifications_a = generate1.output?.justifications || 'Justification for A';
-const model_a = generate1.metadata?.model || 'gpt-4.1-mini';
-
-const svml_b = generate2.output?.svml || 'SVML B content';
-const justifications_b = generate2.output?.justifications || 'Justification for B';
-const model_b = generate2.metadata?.model || 'claude-3-5-sonnet-20241022';
+const svml_version = '1.2.1';
+const model = 'gpt-4.1-mini';
+const original_context = 'Compare the following SVML representations.';
 
 describe('SvmlClient compare', () => {
   const apiKey = envs.api_key || 'test-api-key';
-  const svml_version = '1.2.1';
-  const model = 'gpt-4.1-mini';
-  const original_context = 'Compare the following SVML representations.';
 
   it('should call /compare with SVML and justifications', async () => {
-    if (test_cache.compare) {
-      return;
-    }
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
     });
-    if (cache.auth_jwt) {
-      (client as any).accessToken = cache.auth_jwt;
-      (client as any).authorized = true;
-    } else {
-      await client.authenticate();
-      cache.auth_jwt = client.token;
-      saveCache();
-    }
+    await client.authenticate();
     const params: CompareSVMLParams = {
       svml_a,
       justifications_a,
@@ -70,9 +42,6 @@ describe('SvmlClient compare', () => {
       model,
     };
     const result = await client.compareSVML(params);
-    saveTestOutput('compare_with_justifications', result);
-    cache.compare_api_output = result;
-    saveCache();
     expect(result).toBeDefined();
     expect(result.output).toBeDefined();
     expect(result.output.analysis_a).toBeDefined();
@@ -82,21 +51,11 @@ describe('SvmlClient compare', () => {
   });
 
   it('should call /compare with only SVML', async () => {
-    if (test_cache.compare) {
-      return;
-    }
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
     });
-    if (cache.auth_jwt) {
-      (client as any).accessToken = cache.auth_jwt;
-      (client as any).authorized = true;
-    } else {
-      await client.authenticate();
-      cache.auth_jwt = client.token;
-      saveCache();
-    }
+    await client.authenticate();
     const params: CompareSVMLParams = {
       svml_a,
       svml_b,
@@ -107,9 +66,6 @@ describe('SvmlClient compare', () => {
       model,
     };
     const result = await client.compareSVML(params);
-    saveTestOutput('compare_svml_only', result);
-    cache.compare_svml_only = result;
-    saveCache();
     expect(result).toBeDefined();
     expect(result.output).toBeDefined();
     expect(result.output.analysis_a).toBeDefined();
@@ -119,32 +75,19 @@ describe('SvmlClient compare', () => {
   });
 
   it('should call /compare with two generate outputs', async () => {
-    if (test_cache.compare) {
-      return;
-    }
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
     });
-    if (cache.auth_jwt) {
-      (client as any).accessToken = cache.auth_jwt;
-      (client as any).authorized = true;
-    } else {
-      await client.authenticate();
-      cache.auth_jwt = client.token;
-      saveCache();
-    }
+    await client.authenticate();
     const params: CompareFromGenerateParams = {
-      generate_api_output_a: cache.generate_1,
-      generate_api_output_b: cache.generate_2,
+      generate_api_output_a: generate1,
+      generate_api_output_b: generate2,
       original_context,
       svml_version,
       model,
     };
     const result = await client.compareFromGenerate(params);
-    saveTestOutput('compare_generate_outputs', result);
-    cache.compare_generate_outputs = result;
-    saveCache();
     expect(result).toBeDefined();
     expect(result.output).toBeDefined();
     expect(result.output.analysis_a).toBeDefined();

@@ -21,11 +21,24 @@ import {
   Violation,
   ValidateResponse
 } from './endpoints/validate';
+import {
+  correct,
+  CorrectParams,
+  CorrectResponse
+} from './endpoints/correct';
+import { authenticateWithApiKey } from './endpoints/auth';
+import { withRetry } from './utils/retry';
 
 export interface SvmlClientOptions {
   authURL?: string;
   apiURL?: string;
   version?: number;
+  /** Number of retries for endpoint calls (default: 1) */
+  num_retry?: number;
+  /** If true, use exponential backoff for retries (default: false) */
+  exponential_backoff?: boolean;
+  /** Initial delay in ms before retry (default: 2000) */
+  initial_delay?: number;
 }
 
 const PROD_AUTH_URL = 'https://auth.svml.dev';
@@ -40,6 +53,9 @@ export class SvmlClient {
   private version: number;
   private accessToken: string | null = null;
   private authorized: boolean = false;
+  private num_retry: number;
+  private exponential_backoff: boolean;
+  private initial_delay: number;
 
   constructor(apiKey: string, options: SvmlClientOptions = {}) {
     this.apiKey = apiKey;
@@ -64,6 +80,11 @@ export class SvmlClient {
       },
     });
 
+    // Retry settings
+    this.num_retry = options.num_retry ?? 1;
+    this.exponential_backoff = options.exponential_backoff ?? false;
+    this.initial_delay = options.initial_delay ?? 2000;
+
     // Intercept API responses to handle 401 and flip authorized state
     this.api.interceptors.response.use(
       (response) => response,
@@ -83,8 +104,11 @@ export class SvmlClient {
    */
   async authenticate(): Promise<string> {
     try {
-      const response = await this.auth.post('/api-keys/validate', { api_key: this.apiKey });
-      const { access_token } = response.data;
+      const access_token = await authenticateWithApiKey(this.auth, this.apiKey, {
+        num_retry: this.num_retry,
+        initial_delay: this.initial_delay,
+        exponential_backoff: this.exponential_backoff,
+      });
       if (!access_token) {
         this.authorized = false;
         throw new Error('No access_token returned from API');
@@ -129,16 +153,11 @@ export class SvmlClient {
    */
   async generate(params: GenerateParams): Promise<any> {
     this.checkApiAuth();
-    try {
-      return await generate(this.api, this.accessToken as string, params);
-    } catch (error: any) {
-      if (error.response && error.response.status === 401) {
-        this.authorized = false;
-      }
-      throw new Error(
-        `Generate failed: ${error.response?.data?.detail || error.message}`
-      );
-    }
+    return withRetry(() => generate(this.api, this.accessToken as string, params), {
+      num_retry: this.num_retry,
+      initial_delay: this.initial_delay,
+      exponential_backoff: this.exponential_backoff,
+    });
   }
 
   /**
@@ -146,16 +165,11 @@ export class SvmlClient {
    */
   async compareSVML(params: CompareSVMLParams): Promise<any> {
     this.checkApiAuth();
-    try {
-      return await compareSVML(this.api, this.accessToken as string, params);
-    } catch (error: any) {
-      if (error.response && error.response.status === 401) {
-        this.authorized = false;
-      }
-      throw new Error(
-        `CompareSVML failed: ${error.response?.data?.detail || error.message}`
-      );
-    }
+    return withRetry(() => compareSVML(this.api, this.accessToken as string, params), {
+      num_retry: this.num_retry,
+      initial_delay: this.initial_delay,
+      exponential_backoff: this.exponential_backoff,
+    });
   }
 
   /**
@@ -163,23 +177,17 @@ export class SvmlClient {
    */
   async compareFromGenerate(params: CompareFromGenerateParams): Promise<any> {
     this.checkApiAuth();
-    try {
-      return await compareFromGenerate(this.api, this.accessToken as string, params);
-    } catch (error: any) {
-      if (error.response && error.response.status === 401) {
-        this.authorized = false;
-      }
-      throw new Error(
-        `CompareFromGenerate failed: ${error.response?.data?.detail || error.message}`
-      );
-    }
+    return withRetry(() => compareFromGenerate(this.api, this.accessToken as string, params), {
+      num_retry: this.num_retry,
+      initial_delay: this.initial_delay,
+      exponential_backoff: this.exponential_backoff,
+    });
   }
 
   /**
    * @deprecated Use compareSVML or compareFromGenerate instead.
    */
   async compare(params: any): Promise<any> {
-    // For backward compatibility, try to dispatch to the correct method
     if ((params as any).svml_a && (params as any).svml_b) {
       return this.compareSVML(params as CompareSVMLParams);
     } else if ((params as any).generate_api_output_a && (params as any).generate_api_output_b) {
@@ -194,16 +202,11 @@ export class SvmlClient {
    */
   async refineSVML(params: RefineSVMLParams): Promise<any> {
     this.checkApiAuth();
-    try {
-      return await refine(this.api, this.accessToken as string, params);
-    } catch (error: any) {
-      if (error.response && error.response.status === 401) {
-        this.authorized = false;
-      }
-      throw new Error(
-        `RefineSVML failed: ${error.response?.data?.detail || error.message}`
-      );
-    }
+    return withRetry(() => refine(this.api, this.accessToken as string, params), {
+      num_retry: this.num_retry,
+      initial_delay: this.initial_delay,
+      exponential_backoff: this.exponential_backoff,
+    });
   }
 
   /**
@@ -211,16 +214,11 @@ export class SvmlClient {
    */
   async refineFromGenerate(params: RefineFromGenerateParams): Promise<any> {
     this.checkApiAuth();
-    try {
-      return await refineFromGenerate(this.api, this.accessToken as string, params);
-    } catch (error: any) {
-      if (error.response && error.response.status === 401) {
-        this.authorized = false;
-      }
-      throw new Error(
-        `RefineFromGenerate failed: ${error.response?.data?.detail || error.message}`
-      );
-    }
+    return withRetry(() => refineFromGenerate(this.api, this.accessToken as string, params), {
+      num_retry: this.num_retry,
+      initial_delay: this.initial_delay,
+      exponential_backoff: this.exponential_backoff,
+    });
   }
 
   /**
@@ -228,23 +226,17 @@ export class SvmlClient {
    */
   async refineFromCompare(params: RefineFromCompareParams): Promise<any> {
     this.checkApiAuth();
-    try {
-      return await refineFromCompare(this.api, this.accessToken as string, params);
-    } catch (error: any) {
-      if (error.response && error.response.status === 401) {
-        this.authorized = false;
-      }
-      throw new Error(
-        `RefineFromCompare failed: ${error.response?.data?.detail || error.message}`
-      );
-    }
+    return withRetry(() => refineFromCompare(this.api, this.accessToken as string, params), {
+      num_retry: this.num_retry,
+      initial_delay: this.initial_delay,
+      exponential_backoff: this.exponential_backoff,
+    });
   }
 
   /**
    * @deprecated Use refineSVML, refineFromGenerate, or refineFromCompare instead.
    */
   async refine(params: RefineSVMLParams | RefineFromGenerateParams | RefineFromCompareParams): Promise<any> {
-    // For backward compatibility, try to dispatch to the correct method
     if ((params as any).svml) {
       return this.refineSVML(params as RefineSVMLParams);
     } else if ((params as any).generate_api_output) {
@@ -261,16 +253,23 @@ export class SvmlClient {
    */
   async validate(params: ValidateParams): Promise<ValidateResponse> {
     this.checkApiAuth();
-    try {
-      return await validate(this.api, this.accessToken as string, params);
-    } catch (error: any) {
-      if (error.response && error.response.status === 401) {
-        this.authorized = false;
-      }
-      throw new Error(
-        `Validate failed: ${error.response?.data?.detail || error.message}`
-      );
-    }
+    return withRetry(() => validate(this.api, this.accessToken as string, params), {
+      num_retry: this.num_retry,
+      initial_delay: this.initial_delay,
+      exponential_backoff: this.exponential_backoff,
+    });
+  }
+
+  /**
+   * Calls the /correct endpoint for SVML correction.
+   */
+  async correct(params: CorrectParams): Promise<CorrectResponse> {
+    this.checkApiAuth();
+    return withRetry(() => correct(this.api, this.accessToken as string, params), {
+      num_retry: this.num_retry,
+      initial_delay: this.initial_delay,
+      exponential_backoff: this.exponential_backoff,
+    });
   }
 }
 
@@ -283,5 +282,7 @@ export {
   RefineFromCompareParams,
   ValidateParams,
   Violation,
-  ValidateResponse
+  ValidateResponse,
+  CorrectParams,
+  CorrectResponse
 }; 

@@ -1,0 +1,89 @@
+{
+  "request_id": "ac2a4313-17ea-43ab-8212-2590a9012221",
+  "result": "SUCCESS",
+  "metadata": {
+    "timestamp_start": "2025-04-30T00:27:59.334565+00:00",
+    "timestamp_end": "2025-04-30T00:27:59.335676+00:00",
+    "time_taken": "0.00 seconds",
+    "usage": null,
+    "endpoint": "/v1/validate",
+    "api_version": "v1",
+    "request_id": "ac2a4313-17ea-43ab-8212-2590a9012221"
+  },
+  "input": {
+    "svml": "// Systems thinking framework\n==ADVANCED-QUANTUM==\n%LOGICAL%\n--attention:high--\n\nframe:MetaComposite{\n  %+CUSTOM-MODE+% {\n    ==HOLOGRAPHIC==\n    %ANALYTICAL%\n    --temp:0.7--\n  }\n}\n\n-=SVML-DOC=-          Test Framework\n-=SVML-VERSION=-      1.2.2\n-=SVML-CUSTOM-FIELD=- Advanced testing\n-=SVML-PURPOSE=-      ==PATTERN== %MODE% for deep analysis\n-=SVML-DATE=-         25-04-2025\n\n// Key relationships\nconcept1 && concept2\nconcept3 <<>> concept4\n#undefined_domain#test\n\n%+UNDEFINED-MODE+%\n\nL0{concept_base}\n#domain#{\n  level1 > level2\n  level3 -- level4\nL1{\n  concept1 > concept2\n  concept3 <~> concept4\n\n==REST==\n--rest_window:-10--\n\n==SETTLE:abc==\n==SETTLE:0==\n\n***too_many_stars***\nconcept[+1.5]\n\n/unknown{concept}\n/shift{concept1=>concept2}\n\nframe:test{\n  concept9 ~> concept10\n  concept11 @ context\n  concept12 !@ context\n}\n\n==SPIRAL==\n%ANALYTICAL%\nL1{\n  concept5 <-> concept6\n  concept7 :: concept8\n}\n\n==REST==\n--rest_window:64--\n\n-=SVML-MODULES=-         TOOLS-MODULE <svml.ai/tools>\n-=SVML-AUTHOR=-          Test Author\n-=SVML-MODEL=-           claude-3.7\n-=SVML-COPYRIGHT=-       CC BY 4.0 (2025)\n\n// Additional violations\nframe:MetaComposite{\n  %ENHANCED-MODE% {\n    ==FRACTAL==\n  }\n}\n\n%COLLABORATIVE+INSIGHTFUL%\n\nconcept13 |= concept14\n$special_concept$\n(concept15 | concept16)\n\n--depth:-3--\n--coherence:1.2--\n\n==SETTLE:5==\n--stabilize_window:40--\n\n#domain1{content}\nL7{{nested_content}\n\n/frame{concept -> domain}\n",
+    "svml_version": "1.2.2"
+  },
+  "output": {
+    "valid": false,
+    "violations": [
+      {
+        "line": 15,
+        "type": "Invalid Version Format",
+        "detail": "Version should include 'SVML' and version number",
+        "suggestion": "Use format like 'SVML 1.2.2 <svml.ai/svml/1.2.2>'"
+      },
+      {
+        "line": 16,
+        "type": "Prohibited Custom Metadata Field",
+        "detail": "'CUSTOM-FIELD' is not an allowed metadata field. Custom metadata fields are strictly prohibited.",
+        "suggestion": "Use only official fields: MODULES, COPYRIGHT, DOC-VERSION, VERSION, MODEL, DATE, PURPOSE, AUTHOR, DOC. Remove this custom field immediately."
+      },
+      {
+        "line": 17,
+        "type": "Prohibited Pattern in PURPOSE",
+        "detail": "PURPOSE field contains processing pattern syntax (==PATTERN==), which is strictly prohibited",
+        "suggestion": "Remove all processing pattern syntax from the PURPOSE field. PURPOSE should contain only natural language description."
+      },
+      {
+        "line": 17,
+        "type": "Prohibited Mode in PURPOSE",
+        "detail": "PURPOSE field contains cognitive mode syntax (%MODE%), which is strictly prohibited",
+        "suggestion": "Remove all cognitive mode syntax from the PURPOSE field. PURPOSE should contain only natural language description."
+      },
+      {
+        "line": 18,
+        "type": "Invalid Date Format",
+        "detail": "Date '25-04-2025' is not in the YYYY-MM-DD format",
+        "suggestion": "Use the YYYY-MM-DD format for dates (e.g., 2025-04-23)"
+      },
+      {
+        "line": 2,
+        "type": "Prohibited Custom Pattern",
+        "detail": "'ADVANCED-QUANTUM' is not a recognized processing pattern. Creation of new processing patterns is STRICTLY PROHIBITED.",
+        "suggestion": "Use ONLY officially defined patterns from the SVML 1.2.2 specification: ADAPTIVE-RESONANCE, ATTENUATION-STABILIZATION, CHAOS, CONSTELLATION, FRACTAL, HIERARCHICAL, HOLOGRAPHIC, HUB-SPOKE, NETWORK-MESH, PARALLEL, QUANTUM, RECURSIVE, REST, SETTLE, SPIRAL, TEMPORAL-CASCADE. For specialized needs, use hybrid patterns combining official patterns with the + operator."
+      },
+      {
+        "line": 3,
+        "type": "Prohibited Custom Cognitive Mode",
+        "detail": "'LOGICAL' is not a recognized cognitive mode. Creation of new cognitive modes is STRICTLY PROHIBITED.",
+        "suggestion": "Use ONLY officially defined cognitive modes from the SVML 1.2.2 specification: ANALYTICAL, CREATIVE, CRITICAL, EMPATHETIC, EXPLORATORY, GENERATIVE, INTEGRATIVE, NARRATIVE, PRAGMATIC, REFLECTIVE, SYSTEMS-THINKING. For specialized needs, define custom modes using frame:MetaComposite and %+MODE_NAME+% syntax."
+      },
+      {
+        "line": 4,
+        "type": "Invalid Parameter",
+        "detail": "'attention' is not a valid system parameter",
+        "suggestion": "Use one of the valid parameters: focus, temp, depth, rest_window, coherence, stability"
+      },
+      {
+        "line": 17,
+        "type": "Prohibited Custom Pattern",
+        "detail": "'PATTERN' is not a recognized processing pattern. Creation of new processing patterns is STRICTLY PROHIBITED.",
+        "suggestion": "Use ONLY officially defined patterns from the SVML 1.2.2 specification: ADAPTIVE-RESONANCE, ATTENUATION-STABILIZATION, CHAOS, CONSTELLATION, FRACTAL, HIERARCHICAL, HOLOGRAPHIC, HUB-SPOKE, NETWORK-MESH, PARALLEL, QUANTUM, RECURSIVE, REST, SETTLE, SPIRAL, TEMPORAL-CASCADE. For specialized needs, use hybrid patterns combining official patterns with the + operator."
+      },
+      {
+        "line": 17,
+        "type": "Prohibited Custom Cognitive Mode",
+        "detail": "'MODE' is not a recognized cognitive mode. Creation of new cognitive modes is STRICTLY PROHIBITED.",
+        "suggestion": "Use ONLY officially defined cognitive modes from the SVML 1.2.2 specification: ANALYTICAL, CREATIVE, CRITICAL, EMPATHETIC, EXPLORATORY, GENERATIVE, INTEGRATIVE, NARRATIVE, PRAGMATIC, REFLECTIVE, SYSTEMS-THINKING. For specialized needs, define custom modes using frame:MetaComposite and %+MODE_NAME+% syntax."
+      },
+      {
+        "line": 39,
+        "type": "Invalid SETTLE Parameter",
+        "detail": "SETTLE requires a positive integer parameter, got 0",
+        "suggestion": "Use a positive integer for SETTLE, e.g., SETTLE:3"
+      }
+    ],
+    "best_practices": []
+  }
+} 
