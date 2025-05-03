@@ -1,6 +1,8 @@
-# SVML Node.js SDK
+<div align="center">
+  <img src="./SVML_logo.png" alt="SVML Logo" />
+</div>
 
-![SVML Logo](./SVML_logo.png)
+# SVML Node.js SDK
 
 **SVML Node.js SDK** – Harness the power of [Semantic Vector Markup Language](https://svml.ai) to revolutionize AI interactions through direct cognitive architecture engineering.
 
