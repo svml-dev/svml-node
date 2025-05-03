@@ -1,5 +1,7 @@
 <div align="center">
   <img src="./SVML_logo.png" alt="SVML Logo" />
+  <h3>SVML - Semantic Vector Markup Language</h3>
+  <h4><i>"Learn to Speak in LLM"</i></h4>
 </div>
 
 # SVML Node.js SDK
