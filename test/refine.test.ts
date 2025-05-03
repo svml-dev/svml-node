@@ -24,6 +24,7 @@ describe('SvmlClient refine', () => {
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
+      num_retry: 0,
     });
     await client.authenticate();
     const params: RefineSVMLParams = {
@@ -42,6 +43,7 @@ describe('SvmlClient refine', () => {
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
+      num_retry: 0,
     });
     await client.authenticate();
     const params: RefineFromGenerateParams = {
@@ -60,6 +62,7 @@ describe('SvmlClient refine', () => {
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
+      num_retry: 0,
     });
     await client.authenticate();
     const params: RefineFromCompareParams = {
@@ -78,6 +81,7 @@ describe('SvmlClient refine', () => {
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
+      num_retry: 0,
     });
     await client.authenticate();
     const params: RefineFromCompareParams = {

@@ -2,20 +2,19 @@ import { AxiosInstance } from 'axios';
 
 /**
  * Parameters for comparing two SVML representations directly.
+ * Option 1: Provide svml_a, model_a, svml_b, model_b.
+ * Option 2: Provide generate_api_output_a, generate_api_output_b.
+ * Both require original_context, svml_version, and model.
  */
 export interface CompareSVMLParams {
   /** The first SVML string to compare. */
   svml_a: string;
-  /** Optional justifications for SVML A. */
-  justifications_a?: string;
-  /** Optional model used for SVML A. */
-  model_a?: string;
+  /** The model used for SVML A. */
+  model_a: string;
   /** The second SVML string to compare. */
   svml_b: string;
-  /** Optional justifications for SVML B. */
-  justifications_b?: string;
-  /** Optional model used for SVML B. */
-  model_b?: string;
+  /** The model used for SVML B. */
+  model_b: string;
   /** The original context for the comparison. */
   original_context: string;
   /** The SVML version to use. */

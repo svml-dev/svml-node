@@ -16,6 +16,7 @@ describe('SvmlClient generate', () => {
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
+      num_retry: 0,
     });
     await client.authenticate();
     const result = await client.generate({ context: start_prompt_1, svml_version, model: models[0] });
@@ -28,6 +29,7 @@ describe('SvmlClient generate', () => {
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
+      num_retry: 0,
     });
     await client.authenticate();
     const result = await client.generate({ context: start_prompt_2, svml_version, model: models[1] });

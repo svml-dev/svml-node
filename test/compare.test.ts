@@ -6,60 +6,30 @@ import path from 'path';
 // Load endpoint result fixtures
 const generate1 = require('./fixtures/generate_1.json');
 const generate2 = require('./fixtures/generate_2.json');
-const compareWithJustifications = require('./fixtures/compare_with_justifications.json');
-const compareSvmlOnly = require('./fixtures/compare_svml_only.json');
 
 const svml_a = generate1.output.svml;
-const justifications_a = generate1.output.justifications;
 const model_a = generate1.metadata.model;
-
 const svml_b = generate2.output.svml;
-const justifications_b = generate2.output.justifications;
 const model_b = generate2.metadata.model;
-
-const svml_version = '1.2.1';
+const original_context = generate1.input.context;
+const svml_version = generate1.svml_version || '1.2.1';
 const model = 'gpt-4.1-mini';
-const original_context = 'Compare the following SVML representations.';
 
 describe('SvmlClient compare', () => {
   const apiKey = envs.api_key || 'test-api-key';
+  jest.setTimeout(60000);
 
-  it('should call /compare with SVML and justifications', async () => {
+  it('should call /compare with SVML only', async () => {
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
+      num_retry: 0,
     });
     await client.authenticate();
     const params: CompareSVMLParams = {
       svml_a,
-      justifications_a,
       model_a,
       svml_b,
-      justifications_b,
-      model_b,
-      original_context,
-      svml_version,
-      model,
-    };
-    const result = await client.compareSVML(params);
-    expect(result).toBeDefined();
-    expect(result.output).toBeDefined();
-    expect(result.output.analysis_a).toBeDefined();
-    expect(result.output.analysis_b).toBeDefined();
-    expect(result.metadata).toBeDefined();
-    expect(result.svml_tokens).toBeDefined();
-  });
-
-  it('should call /compare with only SVML', async () => {
-    const client = new SvmlClient(apiKey, {
-      authURL: envs.dev.authURL,
-      apiURL: envs.dev.apiURL,
-    });
-    await client.authenticate();
-    const params: CompareSVMLParams = {
-      svml_a,
-      svml_b,
-      model_a,
       model_b,
       original_context,
       svml_version,
@@ -78,6 +48,7 @@ describe('SvmlClient compare', () => {
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
+      num_retry: 0,
     });
     await client.authenticate();
     const params: CompareFromGenerateParams = {

@@ -19,6 +19,7 @@ describe('SvmlClient correct', () => {
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
+      num_retry: 0,
     });
     await client.authenticate();
     const result = await client.correct({ svml: valid_svml, svml_version, model });
@@ -32,6 +33,7 @@ describe('SvmlClient correct', () => {
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
+      num_retry: 0,
     });
     await client.authenticate();
     const result = await client.correct({ svml: invalid_svml, svml_version, model });
@@ -45,6 +47,7 @@ describe('SvmlClient correct', () => {
     const client = new SvmlClient(apiKey, {
       authURL: envs.dev.authURL,
       apiURL: envs.dev.apiURL,
+      num_retry: 0,
     });
     await client.authenticate();
     // Use the SVML from the validate_invalid_svml fixture
