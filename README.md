@@ -2,7 +2,10 @@
   <img src="./SVML_logo.png" alt="SVML Logo" />
   <h3>SVML - Semantic Vector Markup Language</h3>
   <h4><i>"Learn to Speak in LLM"</i></h4>
+  Language <a href="https://svml.ai">svml.ai</a> | <a href="https://svml.dev">svml.dev</a> Developers
 </div>
+
+<br>
 
 # SVML Node.js SDK
 
