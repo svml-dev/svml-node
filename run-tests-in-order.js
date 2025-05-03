@@ -4,10 +4,11 @@ const { execSync } = require('child_process');
 const testFiles = [
   'test/client.test.ts',
   //'test/generate.test.ts',
-  // 'test/compare.test.ts',
+  //'test/compare.test.ts',
   //'test/refine.test.ts',
-  //  'test/validate.test.ts',
-  'test/correct.test.ts'
+  //'test/validate.test.ts',
+  //'test/correct.test.ts'
+  'test/analyze.test.ts'
 ];
 
 for (const file of testFiles) {

@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+const pkg = require('./package.json');
 import { generate, GenerateParams } from './endpoints/generate';
 import {
   compare,
@@ -28,6 +29,11 @@ import {
 } from './endpoints/correct';
 import { authenticateWithApiKey } from './endpoints/auth';
 import { withRetry } from './utils/retry';
+import { analyze, AnalyzeParams, AnalyzeResponse, AnalyzeDimension, ALL_ANALYZE_DIMENSIONS } from './endpoints/analyze';
+
+const SVML_CLIENT_NAME = 'svml-node';
+const SVML_CLIENT_VERSION = pkg.version;
+const SVML_USER_AGENT = `${SVML_CLIENT_NAME}/${SVML_CLIENT_VERSION}`;
 
 export interface SvmlClientOptions {
   authURL?: string;
@@ -271,6 +277,25 @@ export class SvmlClient {
       exponential_backoff: this.exponential_backoff,
     });
   }
+
+  /**
+   * Calls the /analyze endpoint. Requires authorization.
+   * @param params { svml, svml_version, model, dimensions }
+   *        If dimensions is not provided, all available dimensions will be used.
+   * @returns The API response data.
+   */
+  async analyze(params: AnalyzeParams): Promise<any> {
+    this.checkApiAuth();
+    const finalParams = {
+      ...params,
+      dimensions: params.dimensions ?? ALL_ANALYZE_DIMENSIONS,
+    };
+    return withRetry(() => analyze(this.api, this.accessToken as string, finalParams), {
+      num_retry: this.num_retry,
+      initial_delay: this.initial_delay,
+      exponential_backoff: this.exponential_backoff,
+    });
+  }
 }
 
 export {
@@ -284,5 +309,9 @@ export {
   Violation,
   ValidateResponse,
   CorrectParams,
-  CorrectResponse
+  CorrectResponse,
+  AnalyzeParams,
+  AnalyzeResponse,
+  AnalyzeDimension,
+  ALL_ANALYZE_DIMENSIONS
 }; 

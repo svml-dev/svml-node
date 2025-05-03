@@ -9,11 +9,26 @@ L1{
   tsconfig.json -> typescript_config
   .eslintrc.js, eslint.config.mjs -> linting
   .prettierrc -> formatting
+  # Improvements (2024):
+  test/fixtures/ -> modularized endpoint/scenario fixtures
+  endpoints/ -> JSDoc documentation, robust XML escaping, prompt/output format standardization
+  utils/withRetry.ts -> centralized retry logic (configurable via SvmlClientOptions)
+  LOG_LEVEL env -> debug output control in both Node and Python
+  FastAPI backend -> strict input patterns, robust error handling, debug output, alignment with Node client
 }
 L2{
   endpoints := [generate] // implemented; [auth, validate, correct, compare, refine] // planned
   index.ts <-> api.svml.dev, auth.svml.dev
   endpoints/ -> modular_endpoint_strategy
-  test/ -> [env_switching, jwt_caching, response_caching, output_persistence]
-  principles > [TypeScript, DRY, modularity, extensibility, reproducibility, clarity]
+  test/ -> [env_switching, jwt_caching, response_caching, output_persistence, fixture_driven]
+  principles > [TypeScript, DRY, modularity, extensibility, reproducibility, clarity, SOLID, YAGNI]
+  # Improvements (2024):
+  - Modular test fixtures for maintainability
+  - Centralized, configurable retry logic
+  - JSDoc for all endpoints and client
+  - Strict endpoint input validation (esp. /compare)
+  - Robust XML escaping and tag extraction
+  - LOG_LEVEL-based debug output (Node & Python)
+  - Prompt/output format standardization (<output_format> XML block)
+  - FastAPI backend: strict, transparent, robust
 } 
