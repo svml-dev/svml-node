@@ -1,4 +1,7 @@
-==SVML-LIBRARY==
+==NETWORK-MESH-HUB-SPOKE==
+--coherence:high--
+--focus:medium--
+%ANALYTICAL+INTEGRATIVE%
 L1{
   index.ts <-> SvmlClient
   package.json -> npm packaging
