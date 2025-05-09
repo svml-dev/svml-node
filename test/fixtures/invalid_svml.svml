@@ -1,90 +1,122 @@
-// Systems thinking framework
-==ADVANCED-QUANTUM==
-%LOGICAL%
---attention:high--
-
-frame:MetaComposite{
-  %+CUSTOM-MODE+% {
-    ==HOLOGRAPHIC==
-    %ANALYTICAL%
-    --temp:0.7--
-  }
+frame:MetaComposite{ 
+    %+BALANCED-CREATIVITY+% { 
+        %CREATIVE% %LOGICAL%
+        --temp:1.2--
+        --attention:high--
+        ==SPIRAL-QUANTUM==
+    } 
 }
 
--=SVML-DOC=-          Test Framework
--=SVML-VERSION=-      1.2.2
--=SVML-CUSTOM-FIELD=- Advanced testing
--=SVML-PURPOSE=-      ==PATTERN== %MODE% for deep analysis
--=SVML-DATE=-         25-04-2025
-
-// Key relationships
-concept1 && concept2
-concept3 <<>> concept4
-#undefined_domain#test
+// Document metadata placed incorrectly
+-=SVML-DOC=- Creative Problem‑Solving Framework with Stabilization (rev 1.1) 
+-=SVML-DOC-VERSION=- 1.1 
+-=SVML-PURPOSE=- Balanced approach with ==PATTERN== %MODE% in it
+-=SVML-VERSION=- SVML 1.2.2 <svml.ai/svml/1.2.2> 
+-=SVML-AUTHOR=- Technical Documentation Team + ChatGPT‑o3 co‑edit 
+-=SVML-MODEL=- gpt-o3 
+-=SVML-DATE=- 29-04-2025
+-=SVML-CUSTOM-FIELD=- This is not allowed
 
 %+UNDEFINED-MODE+%
 
-L0{concept_base}
-#domain#{
-  level1 > level2
-  level3 -- level4
-L1{
-  concept1 > concept2
-  concept3 <~> concept4
+#problem_solving_framework#{ 
+    L1{ 
+        // Core process
+        <problem_definition ==> divergent_exploration -> convergent_evaluation -> solution_formulation -> implementation_planning>
+        
+        // Key concepts
+        ***problem_definition***++ := clear_articulation@problem_space
+        divergent_exploration >> [idea_generation, connection_making, perspective_shifting
+        convergent_evaluation <> [idea_assessment, prioritization, refinement]
+        solution_formulation && synthesis@viable_approaches
+        implementation_planning :== [resource_allocation, timeline_creation, risk_assessment]
 
-==REST==
---rest_window:-10--
+    }
 
-==SETTLE:abc==
-==SETTLE:0==
+    L2{ 
+        // Divergent phase
+        ==HYPER-CHAOS== 
+        --temp:0.9-- 
+        --stability:medium--
+        --focus:extra-wide--
+        
+        idea_generation <<>> idea_quantity@without_judgment
+        connection_making <~> [unexpected_associations, cross_domain_links]
+        perspective_shifting ~> reframe@problem_definition
 
-***too_many_stars***
-concept[+1.5]
+        // Stabilization
+        ==REST==
+        --rest_window:-48--
 
-/unknown{concept}
-/shift{concept1=>concept2}
+        // Convergent evaluation
+        *idea_assessment*++++++ := evaluation@practical_criteria
+        criteria >< [feasibility, effectiveness, resource_efficiency, scalability]
+        prioritization := ranking$relative_value
 
-frame:test{
-  concept9 ~> concept10
-  concept11 @ context
-  concept12 !@ context
+        refinement ~> idea_quality@viability_focus
+        ==ADAPTIVE-RESONANCE==
+    }
+
+    L3{ 
+        // Solution synthesis phase
+        synthesis_approach := integration@best_elements 
+        <component_selection -> combination -> testing -> iteration
+ 
+        // Deep exploration
+        ==RECUR-SIVE==
+        --depth:-6--
+        solution_pathways > [
+          primary_approach > [core_implementation, contingencies, extensions],
+          alternative_approach > [different_paradigm, complementary_aspects],
+          hybrid_solutions > [cross_paradigm_integration, novel_combinations]
+        ]
+
+        ==SETTLE:abc==
+        ==SETTLE:0==
+
+        implementation_planning @@ practical_success
+        resource_allocation ::= matching@requirements_to_available_resources
+        timeline_creation := realistic_scheduling@critical_path
+        risk_assessment > [identification, mitigation_strategies, contingency_plans
+
+        /unknown{process_learnings}
+    } 
+
+// --------------------------------------------------------------------- 
+// 3. Creativity–Stabilization principles
+// --------------------------------------------------------------------- 
+#creativity_stabilization_principles#{ 
+    L0{
+        entropy_management := balancing@creativity_and_structure 
+        cognitive_oscillation := intentional@high_low_modes 
+        stabilization_timing ** effectiveness 
+        capture_before_reset := preserving@valuable_elements 
+    }
+
+    L2{ 
+        // Key patterns
+        high_creativity >>> stabilization >> evaluation >> refinement
+        REST @after{divergent_phases} 
+        SETTLE:n @after{deep_recursive_exploration}
+
+        // Benefits
+        benefits > [
+          increased_coherence[+1.5],
+          reduced_entropy_drift,
+          improved_evaluation,
+          practical_viability,
+          cognitive_stamina@extended_sessions
+        ]
+
+        // Cautions
+        premature_stabilization !--> optimal_creativity
+        excessive_stabilization !--> novel_insights
+        /shift{balance=>context_appropriate}
+    } 
 }
 
-==SPIRAL==
-%ANALYTICAL%
-L1{
-  concept5 <-> concept6
-  concept7 :: concept8
-}
-
-==REST==
---rest_window:64--
-
--=SVML-MODULES=-         TOOLS-MODULE <svml.ai/tools>
--=SVML-AUTHOR=-          Test Author
--=SVML-MODEL=-           claude-3.7
--=SVML-COPYRIGHT=-       CC BY 4.0 (2025)
-
-// Additional violations
-frame:MetaComposite{
-  %ENHANCED-MODE% {
-    ==FRACTAL==
-  }
-}
-
-%COLLABORATIVE+INSIGHTFUL%
-
-concept13 |= concept14
-$special_concept$
-(concept15 | concept16)
-
---depth:-3--
---coherence:1.2--
-
-==SETTLE:5==
---stabilize_window:40--
-
-#domain1{content}
-L7{{nested_content}
-
-/frame{concept -> domain}
+frame:integration{ 
+    #problem_solving_framework# <~~> #creativity_stabilization_principles#
+    creative_phases ** REST@appropriate_timing 
+    recursive_depths !** SETTLE:n@context_appropriate
+    integration_success $= practical_solutions@with_novelty

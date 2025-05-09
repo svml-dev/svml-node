@@ -21,6 +21,7 @@ export async function authenticateWithApiKey(
 ): Promise<string> {
   const { withRetry } = await import('../utils/retry');
   return withRetry(async () => {
+    //console.log('apiKey', apiKey);
     const response = await auth.post('/api-keys/validate', { api_key: apiKey });
     const { access_token } = response.data;
     if (!access_token) throw new Error('No access_token returned from API');

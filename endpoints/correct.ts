@@ -4,8 +4,8 @@ import { AxiosInstance } from 'axios';
  * Parameters for the /correct endpoint.
  */
 export interface CorrectParams {
-  /** The SVML string to correct. */
-  svml: string;
+  /** The full output from the /validate endpoint. */
+  validation_api_output: any;
   /** The SVML version to use. */
   svml_version: string;
   /** The model to use for correction. */
@@ -21,6 +21,8 @@ export interface CorrectResponse {
   metadata: Record<string, any>;
   input: Record<string, any>;
   output: Record<string, any>; // You can refine this if you know the output structure
+  svml_version?: string;
+  svml_credits?: number;
 }
 
 /**

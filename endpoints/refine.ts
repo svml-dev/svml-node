@@ -57,6 +57,8 @@ export interface RefineResponse {
   metadata: Record<string, any>;
   input: Record<string, any>;
   output: Record<string, any>; // You can refine this if you know the output structure
+  svml_version?: string;
+  svml_credits?: number;
 }
 
 /**

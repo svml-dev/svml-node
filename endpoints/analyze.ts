@@ -30,6 +30,8 @@ export interface AnalyzeResponse {
   verdict: string;
   narrative: string;
   dimensions: Record<string, any>;
+  svml_version?: string;
+  svml_credits?: number;
   usage?: any;
   [key: string]: any; // allow extra fields
 }

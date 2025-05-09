@@ -50,6 +50,10 @@ describe('SvmlClient analyze', () => {
     expect(Object.keys(result.dimensions)).toEqual(['cognitive_divergence']);
     expect(typeof result.overall_score).toBe('number');
     expect(typeof result.verdict).toBe('string');
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(!('usage' in result)).toBe(true);
+    expect(!('usage' in result.dimensions)).toBe(true);
   });
 
   it('should analyze compression_signature', async () => {
@@ -71,6 +75,10 @@ describe('SvmlClient analyze', () => {
     expect(Object.keys(result.dimensions)).toEqual(['compression_signature']);
     expect(typeof result.overall_score).toBe('number');
     expect(typeof result.verdict).toBe('string');
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(!('usage' in result)).toBe(true);
+    expect(!('usage' in result.dimensions)).toBe(true);
   });
 
   it('should analyze metaphor_anchoring', async () => {
@@ -92,6 +100,10 @@ describe('SvmlClient analyze', () => {
     expect(Object.keys(result.dimensions)).toEqual(['metaphor_anchoring']);
     expect(typeof result.overall_score).toBe('number');
     expect(typeof result.verdict).toBe('string');
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(!('usage' in result)).toBe(true);
+    expect(!('usage' in result.dimensions)).toBe(true);
   });
 
   it('should analyze prompt_form_alignment', async () => {
@@ -113,6 +125,10 @@ describe('SvmlClient analyze', () => {
     expect(Object.keys(result.dimensions)).toEqual(['prompt_form_alignment']);
     expect(typeof result.overall_score).toBe('number');
     expect(typeof result.verdict).toBe('string');
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(!('usage' in result)).toBe(true);
+    expect(!('usage' in result.dimensions)).toBe(true);
   });
 
   it('should analyze author_trace', async () => {
@@ -134,6 +150,10 @@ describe('SvmlClient analyze', () => {
     expect(Object.keys(result.dimensions)).toEqual(['author_trace']);
     expect(typeof result.overall_score).toBe('number');
     expect(typeof result.verdict).toBe('string');
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(!('usage' in result)).toBe(true);
+    expect(!('usage' in result.dimensions)).toBe(true);
   });
 
   it('should analyze ambiguity_resolution', async () => {
@@ -155,5 +175,9 @@ describe('SvmlClient analyze', () => {
     expect(Object.keys(result.dimensions)).toEqual(['ambiguity_resolution']);
     expect(typeof result.overall_score).toBe('number');
     expect(typeof result.verdict).toBe('string');
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(!('usage' in result)).toBe(true);
+    expect(!('usage' in result.dimensions)).toBe(true);
   });
 }); 

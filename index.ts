@@ -30,6 +30,8 @@ import {
 import { authenticateWithApiKey } from './endpoints/auth';
 import { withRetry } from './utils/retry';
 import { analyze, AnalyzeParams, AnalyzeResponse, AnalyzeDimension, ALL_ANALYZE_DIMENSIONS } from './endpoints/analyze';
+import { UserId } from 'shared-svml';
+import { fetchModels, fetchSvmlVersions, ModelInfo } from './endpoints/metadata';
 
 const SVML_CLIENT_NAME = 'svml-node';
 const SVML_CLIENT_VERSION = pkg.version;
@@ -62,6 +64,12 @@ export class SvmlClient {
   private num_retry: number;
   private exponential_backoff: boolean;
   private initial_delay: number;
+
+  // Alignment additions
+  public models: string[] = [];
+  public svmlVersions: string[] = [];
+  public defaultModel: string = '';
+  public defaultSvmlVersion: string = '';
 
   constructor(apiKey: string, options: SvmlClientOptions = {}) {
     this.apiKey = apiKey;
@@ -101,6 +109,13 @@ export class SvmlClient {
         return Promise.reject(error);
       },
     );
+
+    // Add global client metadata headers (parity with Python)
+    this.api.defaults.headers.common['X-Client-Name'] = 'svml-node';
+    this.api.defaults.headers.common['X-Client-Version'] = '1.0.0'; // update as needed
+    this.api.defaults.headers.common['X-Platform'] = process.platform;
+    this.api.defaults.headers.common['X-Language-Version'] = `node-${process.version}`;
+    this.api.defaults.headers.common['X-User-Agent'] = `svml-node/1.0.0`;
   }
 
   /**
@@ -110,18 +125,38 @@ export class SvmlClient {
    */
   async authenticate(): Promise<string> {
     try {
-      const access_token = await authenticateWithApiKey(this.auth, this.apiKey, {
+      const resp: any = await authenticateWithApiKey(this.auth, this.apiKey, {
         num_retry: this.num_retry,
         initial_delay: this.initial_delay,
         exponential_backoff: this.exponential_backoff,
       });
-      if (!access_token) {
-        this.authorized = false;
-        throw new Error('No access_token returned from API');
+      // Debug log
+      // console.log('Auth resp:', resp, typeof resp);
+
+      if (typeof resp === 'object' && resp !== null) {
+        this.accessToken = resp.access_token || (typeof resp === 'string' ? resp : '');
+        if (!this.accessToken) throw new Error('No access token returned from API');
+        this.authorized = true;
+        if (resp.models && resp.svml_versions) {
+          this.models = resp.models;
+          this.svmlVersions = resp.svml_versions;
+        } else {
+          await this.fetchModels();
+          await this.fetchSvmlVersions();
+        }
+      } else {
+        this.accessToken = typeof resp === 'string' ? resp : '';
+        // console.log('Access token:', this.accessToken);
+        if (!this.accessToken) throw new Error('No access token returned from API');
+        this.authorized = true;
+        await this.fetchModels();
+        await this.fetchSvmlVersions();
       }
-      this.accessToken = access_token;
-      this.authorized = true;
-      return access_token;
+      // Set defaults if not already set
+      if (!this.defaultModel && this.models.length) this.defaultModel = this.models[0];
+      if (!this.defaultSvmlVersion && this.svmlVersions.length) this.defaultSvmlVersion = this.svmlVersions[0];
+      
+      return this.accessToken;
     } catch (error: any) {
       this.authorized = false;
       throw new Error(
@@ -138,7 +173,7 @@ export class SvmlClient {
   }
 
   // Optionally, expose the token for use in other requests
-  get token(): string | null {
+  public get token(): string | null {
     return this.accessToken;
   }
 
@@ -159,6 +194,10 @@ export class SvmlClient {
    */
   async generate(params: GenerateParams): Promise<any> {
     this.checkApiAuth();
+    const model = params.model || this.defaultModel;
+    const svmlVersion = params.svml_version || this.defaultSvmlVersion;
+    this.validateModel(model);
+    this.validateSvmlVersion(svmlVersion);
     return withRetry(() => generate(this.api, this.accessToken as string, params), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
@@ -167,10 +206,16 @@ export class SvmlClient {
   }
 
   /**
-   * Calls the /compare endpoint for direct SVML comparison.
+   * Compares two SVML strings directly.
+   * @param params CompareSVMLParams
+   * @returns CompareResponse
    */
   async compareSVML(params: CompareSVMLParams): Promise<any> {
     this.checkApiAuth();
+    const model = params.model || this.defaultModel;
+    const svmlVersion = params.svml_version || this.defaultSvmlVersion;
+    this.validateModel(model);
+    this.validateSvmlVersion(svmlVersion);
     return withRetry(() => compareSVML(this.api, this.accessToken as string, params), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
@@ -179,10 +224,16 @@ export class SvmlClient {
   }
 
   /**
-   * Calls the /compare endpoint for comparison from two generate outputs.
+   * Compares two /generate endpoint outputs.
+   * @param params CompareFromGenerateParams
+   * @returns CompareResponse
    */
   async compareFromGenerate(params: CompareFromGenerateParams): Promise<any> {
     this.checkApiAuth();
+    const model = params.model || this.defaultModel;
+    const svmlVersion = params.svml_version || this.defaultSvmlVersion;
+    this.validateModel(model);
+    this.validateSvmlVersion(svmlVersion);
     return withRetry(() => compareFromGenerate(this.api, this.accessToken as string, params), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
@@ -204,10 +255,14 @@ export class SvmlClient {
   }
 
   /**
-   * Calls the /refine endpoint for direct SVML refinement.
+   * Refines a user-supplied SVML string.
+   * @param params RefineSVMLParams
+   * @returns RefineResponse
    */
   async refineSVML(params: RefineSVMLParams): Promise<any> {
     this.checkApiAuth();
+    this.validateModel(params.model);
+    if (params.svml_version) this.validateSvmlVersion(params.svml_version);
     return withRetry(() => refine(this.api, this.accessToken as string, params), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
@@ -216,10 +271,14 @@ export class SvmlClient {
   }
 
   /**
-   * Calls the /refine endpoint for refinement from /generate output.
+   * Refines SVML from a /generate endpoint output.
+   * @param params RefineFromGenerateParams
+   * @returns RefineResponse
    */
   async refineFromGenerate(params: RefineFromGenerateParams): Promise<any> {
     this.checkApiAuth();
+    this.validateModel(params.model);
+    if (params.svml_version) this.validateSvmlVersion(params.svml_version);
     return withRetry(() => refineFromGenerate(this.api, this.accessToken as string, params), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
@@ -228,10 +287,14 @@ export class SvmlClient {
   }
 
   /**
-   * Calls the /refine endpoint for refinement from /compare output.
+   * Refines SVML from a /compare endpoint output.
+   * @param params RefineFromCompareParams
+   * @returns RefineResponse
    */
   async refineFromCompare(params: RefineFromCompareParams): Promise<any> {
     this.checkApiAuth();
+    this.validateModel(params.model);
+    if (params.svml_version) this.validateSvmlVersion(params.svml_version);
     return withRetry(() => refineFromCompare(this.api, this.accessToken as string, params), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
@@ -259,6 +322,8 @@ export class SvmlClient {
    */
   async validate(params: ValidateParams): Promise<ValidateResponse> {
     this.checkApiAuth();
+    const svmlVersion = (params as any).svml_version || this.defaultSvmlVersion;
+    this.validateSvmlVersion(svmlVersion);
     return withRetry(() => validate(this.api, this.accessToken as string, params), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
@@ -271,6 +336,11 @@ export class SvmlClient {
    */
   async correct(params: CorrectParams): Promise<CorrectResponse> {
     this.checkApiAuth();
+    const model = params.model || this.defaultModel;
+    const svmlVersion = params.svml_version || this.defaultSvmlVersion;
+    this.validateModel(model);
+    this.validateSvmlVersion(svmlVersion);
+    // params must have validation_api_output, svml_version, model
     return withRetry(() => correct(this.api, this.accessToken as string, params), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
@@ -286,6 +356,10 @@ export class SvmlClient {
    */
   async analyze(params: AnalyzeParams): Promise<any> {
     this.checkApiAuth();
+    const model = params.model || this.defaultModel;
+    const svmlVersion = params.svml_version || this.defaultSvmlVersion;
+    this.validateModel(model);
+    this.validateSvmlVersion(svmlVersion);
     const finalParams = {
       ...params,
       dimensions: params.dimensions ?? ALL_ANALYZE_DIMENSIONS,
@@ -295,6 +369,53 @@ export class SvmlClient {
       initial_delay: this.initial_delay,
       exponential_backoff: this.exponential_backoff,
     });
+  }
+
+  private validateModel(model: string): void {
+    if (this.models.length && !this.models.includes(model)) {
+      throw new Error(`Model '${model}' is not supported. Available: ${this.models.join(', ')}`);
+    }
+  }
+
+  private validateSvmlVersion(version: string): void {
+    if (this.svmlVersions.length && !this.svmlVersions.includes(version)) {
+      throw new Error(`SVML version '${version}' is not supported. Available: ${this.svmlVersions.join(', ')}`);
+    }
+  }
+
+  public setDefaultModel(model: string): void {
+    this.validateModel(model);
+    this.defaultModel = model;
+  }
+
+  public setDefaultSvmlVersion(version: string): void {
+    this.validateSvmlVersion(version);
+    this.defaultSvmlVersion = version;
+  }
+
+  // Example method
+  getUserId(): UserId {
+    return 'example-user-id';
+  }
+
+  /**
+   * Fetches available models from the API and updates the client.
+   */
+  public async fetchModels(): Promise<ModelInfo[]> {
+    this.checkApiAuth();
+    const models = await fetchModels(this.api, this.accessToken as string);    
+    this.models = models.map((m) => m.id);
+    return models;
+  }
+
+  /**
+   * Fetches supported SVML versions from the API and updates the client.
+   */
+  public async fetchSvmlVersions(): Promise<string[]> {
+    this.checkApiAuth();
+    const versions = await fetchSvmlVersions(this.api, this.accessToken as string);
+    this.svmlVersions = versions;
+    return versions;
   }
 }
 

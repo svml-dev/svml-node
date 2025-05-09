@@ -24,6 +24,11 @@ describe('SvmlClient validate', () => {
     const result = await client.validate({ svml: valid_svml, svml_version });
     expect(result).toBeDefined();
     expect(result.metadata).toBeDefined();
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(!('usage' in result)).toBe(true);
+    expect(!('svml_tokens' in result)).toBe(true);
+    expect(!('usage' in result.output)).toBe(true);
     expect(Array.isArray(result.output.violations)).toBe(true);
     expect(result.output.violations.length === 0).toBe(true);
     expect(Array.isArray(result.output.best_practices)).toBe(true);
@@ -36,7 +41,12 @@ describe('SvmlClient validate', () => {
     });
     await client.authenticate();
     const result = await client.validate({ svml: invalid_svml, svml_version });
-    expect(result).toBeDefined();
+    expect(result).toBeDefined();    
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(!('usage' in result)).toBe(true);
+    expect(!('svml_tokens' in result)).toBe(true);
+    expect(!('usage' in result.output)).toBe(true);
     expect(Array.isArray(result.output.violations)).toBe(true);
     expect(result.output.violations.length > 0).toBe(true);
     expect(Array.isArray(result.output.best_practices)).toBe(true);
@@ -54,7 +64,9 @@ describe('SvmlClient validate', () => {
     if (result.output.best_practices.length > 0) {
       expect(
         result.output.best_practices.every(
-          (bp: any) => typeof bp === 'string' || (bp.type && bp.type.startsWith('Best Practice'))
+          (bp: any) =>
+            (typeof bp === 'string' && bp.startsWith('Best Practice')) ||
+            (typeof bp === 'object' && bp.type && bp.type.startsWith('Best Practice'))
         )
       ).toBe(true);
     }

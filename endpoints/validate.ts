@@ -40,6 +40,8 @@ export interface ValidateResponse {
     /** List of best practices or suggestions. */
     best_practices: Violation[];
   };
+  svml_version?: string;
+  svml_credits?: number;
 }
 
 /**

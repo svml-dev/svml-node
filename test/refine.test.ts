@@ -4,17 +4,24 @@ import fs from 'fs';
 import path from 'path';
 
 // Load endpoint result fixtures
-const generate1 = require('./fixtures/generate_1.json');
-const generate2 = require('./fixtures/generate_2.json');
-const compareWithJustifications = require('./fixtures/compare_with_justifications.json');
-const compareSvmlOnly = require('./fixtures/compare_svml_only.json');
-
+const generate1 = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'fixtures/generate_1.json'), 'utf-8')
+);
+const generate2 = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'fixtures/generate_2.json'), 'utf-8')
+);
+const compareWithJustifications = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'fixtures/compare_with_justifications.json'), 'utf-8')
+);
+const compareSvmlOnly = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'fixtures/compare_svml_only.json'), 'utf-8')
+);
 const svml = generate1.output.svml;
 const original_context = generate1.input.context;
 const generate_api_output = generate1;
 const compare_api_output = compareWithJustifications;
 const user_additional_context = 'Please focus on improving clarity and hierarchical structure.';
-const svml_version = '1.2.1';
+const svml_version = '1.2.2';
 const model = 'gpt-4.1-mini';
 
 describe('SvmlClient refine', () => {
@@ -37,6 +44,11 @@ describe('SvmlClient refine', () => {
     const result = await client.refineSVML(params);
     expect(result).toBeDefined();
     expect(result.output).toBeDefined();
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(typeof result.output.svml).toBe('string');
+    expect(!('usage' in result)).toBe(true);
+    expect(!('usage' in result.output)).toBe(true);
   });
 
   it('should call /refine with generate_api_output', async () => {
@@ -56,6 +68,11 @@ describe('SvmlClient refine', () => {
     const result = await client.refineFromGenerate(params);
     expect(result).toBeDefined();
     expect(result.output).toBeDefined();
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(typeof result.output.svml).toBe('string');
+    expect(!('usage' in result)).toBe(true);
+    expect(!('usage' in result.output)).toBe(true);
   });
 
   it('should call /refine with compare_api_output', async () => {
@@ -75,6 +92,11 @@ describe('SvmlClient refine', () => {
     const result = await client.refineFromCompare(params);
     expect(result).toBeDefined();
     expect(result.output).toBeDefined();
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(typeof result.output.svml).toBe('string');
+    expect(!('usage' in result)).toBe(true);
+    expect(!('usage' in result.output)).toBe(true);
   });
 
   it('should call /refine with compare_api_output and user_additional_context', async () => {
@@ -94,5 +116,10 @@ describe('SvmlClient refine', () => {
     const result = await client.refineFromCompare(params);
     expect(result).toBeDefined();
     expect(result.output).toBeDefined();
+    expect('svml_version' in result && result.svml_version).toBeTruthy();
+    expect('svml_credits' in result && result.svml_credits).toBeTruthy();
+    expect(typeof result.output.svml).toBe('string');
+    expect(!('usage' in result)).toBe(true);
+    expect(!('usage' in result.output)).toBe(true);
   });
 }); 
