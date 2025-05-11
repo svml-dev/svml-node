@@ -30,7 +30,7 @@ import {
 import { authenticateWithApiKey } from './endpoints/auth';
 import { withRetry } from './utils/retry';
 import { analyze, AnalyzeParams, AnalyzeResponse, AnalyzeDimension, ALL_ANALYZE_DIMENSIONS } from './endpoints/analyze';
-import { UserId } from 'shared-svml';
+import { UserId } from './shared-svml';
 import { fetchModels, fetchSvmlVersions, ModelInfo } from './endpoints/metadata';
 
 const SVML_CLIENT_NAME = 'svml-node';

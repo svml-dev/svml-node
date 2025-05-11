@@ -103,3 +103,4 @@ test/cache.local.json
 test/test-output.local.json 
 
 .env*
+dist/
