@@ -55,8 +55,8 @@ const PROD_API_URL = 'https://api.svml.dev';
 export class SvmlClient {
   public readonly apiBase: string;
   public readonly authBase: string;
-  private auth: AxiosInstance;
-  private api: AxiosInstance;
+  protected auth: AxiosInstance;
+  protected api: AxiosInstance;
   private apiKey: string;
   private version: number;
   private accessToken: string | null = null;

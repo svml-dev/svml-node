@@ -101,3 +101,5 @@ test-output/
 test/env.local.json
 test/cache.local.json
 test/test-output.local.json 
+
+.env*
