@@ -1,4 +1,4 @@
-import { SvmlClient, RefineSVMLParams, RefineFromGenerateParams, RefineFromCompareParams } from '../index';
+import { SvmlClient, RefineSVMLParams, RefineFromGenerateParams, RefineFromCompareParams } from '../src/index';
 import envs from './env.local.json';
 import fs from 'fs';
 import path from 'path';

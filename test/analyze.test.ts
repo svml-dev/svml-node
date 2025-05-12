@@ -1,4 +1,4 @@
-import { SvmlClient, AnalyzeParams, ALL_ANALYZE_DIMENSIONS } from '../index';
+import { SvmlClient, AnalyzeParams, ALL_ANALYZE_DIMENSIONS } from '../src/index';
 import envs from './env.local.json';
 import fs from 'fs';
 import path from 'path';

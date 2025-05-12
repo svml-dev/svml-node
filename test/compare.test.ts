@@ -1,4 +1,4 @@
-import { SvmlClient, CompareSVMLParams, CompareFromGenerateParams } from '../index';
+import { SvmlClient, CompareSVMLParams, CompareFromGenerateParams } from '../src/index';
 import envs from './env.local.json';
 import fs from 'fs';
 import path from 'path';

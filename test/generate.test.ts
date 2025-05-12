@@ -1,5 +1,5 @@
 
-import { SvmlClient } from '../index';
+import { SvmlClient } from '../src/index';
 import envs from './env.local.json';
 import fs from 'fs';
 import path from 'path';

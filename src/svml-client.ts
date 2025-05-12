@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-const pkg = require('./package.json');
+const pkg = require('../package.json');
 import { generate, GenerateParams } from './endpoints/generate';
 import {
   compare,
@@ -57,7 +57,7 @@ export class SvmlClient {
   public readonly authBase: string;
   protected auth: AxiosInstance;
   protected api: AxiosInstance;
-  private apiKey: string;
+  private apiKey: string | undefined;
   private version: number;
   private accessToken: string | null = null;
   private authorized: boolean = false;
@@ -71,8 +71,9 @@ export class SvmlClient {
   public defaultModel: string = '';
   public defaultSvmlVersion: string = '';
 
-  constructor(apiKey: string, options: SvmlClientOptions = {}) {
-    this.apiKey = apiKey;
+  constructor();
+  constructor(apiKey: string, options?: SvmlClientOptions);
+  constructor(apiKey?: string, options: SvmlClientOptions = {}) {
     this.version = options.version ?? 1;
     const authURL = options.authURL || PROD_AUTH_URL;
     const apiURL = options.apiURL || PROD_API_URL;
@@ -116,6 +117,17 @@ export class SvmlClient {
     this.api.defaults.headers.common['X-Platform'] = process.platform;
     this.api.defaults.headers.common['X-Language-Version'] = `node-${process.version}`;
     this.api.defaults.headers.common['X-User-Agent'] = `svml-node/1.0.0`;
+
+    if (apiKey) {
+      this.setAPIKey(apiKey);
+    }
+  }
+
+  public setAPIKey(apiKey: string) {
+    this.apiKey = apiKey;
+    // Optionally, reset accessToken and authorized state
+    this.accessToken = null;
+    this.authorized = false;
   }
 
   /**
@@ -125,7 +137,7 @@ export class SvmlClient {
    */
   async authenticate(): Promise<string> {
     try {
-      const resp: any = await authenticateWithApiKey(this.auth, this.apiKey, {
+      const resp: any = await authenticateWithApiKey(this.auth, this.apiKey as string, {
         num_retry: this.num_retry,
         initial_delay: this.initial_delay,
         exponential_backoff: this.exponential_backoff,
