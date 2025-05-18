@@ -1,4 +1,5 @@
 import { AxiosInstance } from 'axios';
+import { StandardLLMSettings } from '../common-types';
 
 export enum AnalyzeDimension {
   CognitiveDivergence = "cognitive_divergence",
@@ -20,9 +21,8 @@ export const ALL_ANALYZE_DIMENSIONS: string[] = [
 
 export interface AnalyzeParams {
   svml: string;
-  svml_version?: string;
-  model?: string;
   dimensions?: string[];
+  settings?: StandardLLMSettings;
 }
 
 export interface AnalyzeResponse {

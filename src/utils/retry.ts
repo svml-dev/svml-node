@@ -33,7 +33,7 @@ export async function withRetry<T>(
       lastError = err;
       // Debug output for each retry attempt
       const errMsg = (err as any)?.message || err;
-      console.warn(`[withRetry] Attempt ${attempt + 1} failed:`, errMsg);
+      console.warn(`[SVML-CLIENT-withRetry] Attempt ${attempt + 1} failed:`, errMsg);
       if (attempt === num_retry) break;
       await new Promise((resolve) => setTimeout(resolve, delay));
       if (exponential_backoff) delay *= 2;

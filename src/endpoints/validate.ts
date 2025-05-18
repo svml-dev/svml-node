@@ -6,8 +6,8 @@ import { AxiosInstance } from 'axios';
 export interface ValidateParams {
   /** The SVML string to validate. */
   svml: string;
-  /** The SVML version to use. */
-  svml_version: string;
+  /** The SVML version to use. Defaults to "latest" on the backend if not provided. */
+  svml_version?: string;
 }
 
 /**

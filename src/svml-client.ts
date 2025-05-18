@@ -1,20 +1,15 @@
 import axios, { AxiosInstance } from 'axios';
-const pkg = require('../package.json');
-import { generate, GenerateParams } from './endpoints/generate';
+const pkg = require('../../package.json');
+import { generate, GenerateParams, GenerateResponse } from './endpoints/generate';
 import {
   compare,
-  compareSVML,
-  compareFromGenerate,
-  CompareSVMLParams,
-  CompareFromGenerateParams
+  CompareParams,
+  CompareResponse
 } from './endpoints/compare';
 import {
   refine,
-  refineFromGenerate,
-  refineFromCompare,
-  RefineSVMLParams,
-  RefineFromGenerateParams,
-  RefineFromCompareParams
+  RefineParams,
+  RefineResponse
 } from './endpoints/refine';
 import {
   validate,
@@ -30,16 +25,19 @@ import {
 import { authenticateWithApiKey } from './endpoints/auth';
 import { withRetry } from './utils/retry';
 import { analyze, AnalyzeParams, AnalyzeResponse, AnalyzeDimension, ALL_ANALYZE_DIMENSIONS } from './endpoints/analyze';
+import { customPrompt, CustomPromptParams, CustomPromptResponse } from './endpoints/custom_prompts';
 import { UserId } from './shared-svml';
 import { fetchModels, fetchSvmlVersions, ModelInfo } from './endpoints/metadata';
+import { StandardLLMSettings } from './common-types';
 
 const SVML_CLIENT_NAME = 'svml-node';
 const SVML_CLIENT_VERSION = pkg.version;
-const SVML_USER_AGENT = `${SVML_CLIENT_NAME}/${SVML_CLIENT_VERSION}`;
+const SVML_USER_AGENT = `${SVML_CLIENT_NAME}/${SVML_CLIENT_VERSION} (${process.platform}; node-${process.version})`;
 
 export interface SvmlClientOptions {
-  authURL?: string;
+  apiKey?: string;
   apiURL?: string;
+  authURL?: string;
   version?: number;
   /** Number of retries for endpoint calls (default: 1) */
   num_retry?: number;
@@ -53,81 +51,75 @@ const PROD_AUTH_URL = 'https://auth.svml.dev';
 const PROD_API_URL = 'https://api.svml.dev';
 
 export class SvmlClient {
+  public readonly api: AxiosInstance;
+  public readonly auth: AxiosInstance;
+  public readonly version: number;
+  public readonly num_retry: number;
+  public readonly initial_delay: number;
+  public readonly exponential_backoff: boolean;
   public readonly apiBase: string;
   public readonly authBase: string;
-  protected auth: AxiosInstance;
-  protected api: AxiosInstance;
-  private apiKey: string | undefined;
-  private version: number;
-  private accessToken: string | null = null;
-  private authorized: boolean = false;
-  private num_retry: number;
-  private exponential_backoff: boolean;
-  private initial_delay: number;
 
-  // Alignment additions
-  public models: string[] = [];
-  public svmlVersions: string[] = [];
+  protected accessToken: string | null = null;
+  protected authorized: boolean = false;
   public defaultModel: string = '';
   public defaultSvmlVersion: string = '';
+  public models: string[] = [];
+  public svmlVersions: string[] = [];
 
-  constructor();
-  constructor(apiKey: string, options?: SvmlClientOptions);
-  constructor(apiKey?: string, options: SvmlClientOptions = {}) {
+  constructor(options: SvmlClientOptions = {}) {
     this.version = options.version ?? 1;
-    const authURL = options.authURL || PROD_AUTH_URL;
-    const apiURL = options.apiURL || PROD_API_URL;
+    
+    let apiURL = options.apiURL || PROD_API_URL;
+    let authURL = options.authURL || PROD_AUTH_URL;
+
     const versionPath = `/v${this.version}`;
+    if (!apiURL.includes(versionPath) && !apiURL.match(/\/v\d+(\.\d+)*$/)) {
+      apiURL = apiURL.replace(/\/$/, '') + versionPath;
+    }
+    if (!authURL.includes(versionPath) && !authURL.match(/\/v\d+(\.\d+)*$/)) {
+      authURL = authURL.replace(/\/$/, '') + versionPath;
+    }
 
-    this.authBase = authURL;
-    this.apiBase = apiURL;
+    this.authBase = options.authURL || PROD_AUTH_URL;
+    this.apiBase = options.apiURL || PROD_API_URL;
 
-    this.auth = axios.create({
-      baseURL: authURL + versionPath,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    this.api = axios.create({
-      baseURL: apiURL + versionPath,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    this.auth = axios.create({ baseURL: authURL, headers: { 'Content-Type': 'application/json' } });
+    this.api = axios.create({ baseURL: apiURL, headers: { 'Content-Type': 'application/json' } });
 
-    // Retry settings
-    this.num_retry = options.num_retry ?? 1;
+    this.num_retry = options.num_retry ?? 0;
     this.exponential_backoff = options.exponential_backoff ?? false;
     this.initial_delay = options.initial_delay ?? 2000;
 
-    // Intercept API responses to handle 401 and flip authorized state
     this.api.interceptors.response.use(
       (response) => response,
       (error) => {
-        if (error.response && error.response.status === 401) {
+        if (error.response && error.response.status === 401 && !error.config?._isRetryAttempt) {
           this.authorized = false;
         }
         return Promise.reject(error);
       },
     );
 
-    // Add global client metadata headers (parity with Python)
     this.api.defaults.headers.common['X-Client-Name'] = 'svml-node';
-    this.api.defaults.headers.common['X-Client-Version'] = '1.0.0'; // update as needed
+    this.api.defaults.headers.common['X-Client-Version'] = pkg.version;
     this.api.defaults.headers.common['X-Platform'] = process.platform;
     this.api.defaults.headers.common['X-Language-Version'] = `node-${process.version}`;
-    this.api.defaults.headers.common['X-User-Agent'] = `svml-node/1.0.0`;
+    this.api.defaults.headers.common['X-User-Agent'] = SVML_USER_AGENT;
 
-    if (apiKey) {
-      this.setAPIKey(apiKey);
+    if (options.apiKey) {
+        this.setAPIKey(options.apiKey);
     }
   }
 
-  public setAPIKey(apiKey: string) {
-    this.apiKey = apiKey;
-    // Optionally, reset accessToken and authorized state
-    this.accessToken = null;
-    this.authorized = false;
+  public setAPIKey(apiKey: string): void {
+    if (!apiKey || typeof apiKey !== 'string') {
+      throw new Error('Invalid API key. Must be a non-empty string.');
+    }
+    this.accessToken = apiKey;
+    this.authorized = true;
+    this.api.defaults.headers.common['Authorization'] = `Bearer ${apiKey}`;
+    console.log('[SvmlClient setAPIKey] API key set. Authorized: true. Token type: API_KEY_AUTH');
   }
 
   /**
@@ -137,7 +129,7 @@ export class SvmlClient {
    */
   async authenticate(): Promise<string> {
     try {
-      const resp: any = await authenticateWithApiKey(this.auth, this.apiKey as string, {
+      const resp: any = await authenticateWithApiKey(this.auth, this.accessToken as string, {
         num_retry: this.num_retry,
         initial_delay: this.initial_delay,
         exponential_backoff: this.exponential_backoff,
@@ -201,16 +193,21 @@ export class SvmlClient {
 
   /**
    * Calls the /generate endpoint. Requires authorization.
-   * @param params { context, svml_version, model }
+   * @param params The parameters for the generate endpoint, excluding settings which is handled separately.
+   * @param options Optional settings for the LLM call.
    * @returns The API response data.
    */
-  async generate(params: GenerateParams): Promise<any> {
+  async generate(params: Pick<GenerateParams, 'context'>, options?: { settings?: StandardLLMSettings }): Promise<GenerateResponse> {
     this.checkApiAuth();
-    const model = params.model || this.defaultModel;
-    const svmlVersion = params.svml_version || this.defaultSvmlVersion;
-    this.validateModel(model);
-    this.validateSvmlVersion(svmlVersion);
-    return withRetry(() => generate(this.api, this.accessToken as string, params), {
+    
+    const finalParams: GenerateParams = {
+      context: params.context,
+      settings: options?.settings
+    };
+
+    console.log('[SvmlClient.generate] finalParams being sent:', JSON.stringify(finalParams, null, 2));
+
+    return withRetry(() => generate(this.api, this.accessToken as string, finalParams), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
       exponential_backoff: this.exponential_backoff,
@@ -218,17 +215,18 @@ export class SvmlClient {
   }
 
   /**
-   * Compares two SVML strings directly.
-   * @param params CompareSVMLParams
+   * Compares SVML representations or /generate outputs.
+   * @param params Unified parameters for comparison (original_context, svml_a/b, generate_api_output_a/b).
+   * @param options Optional settings for the LLM call.
    * @returns CompareResponse
    */
-  async compareSVML(params: CompareSVMLParams): Promise<any> {
+  async compare(params: Omit<CompareParams, 'settings'>, options?: { settings?: StandardLLMSettings }): Promise<CompareResponse> {
     this.checkApiAuth();
-    const model = params.model || this.defaultModel;
-    const svmlVersion = params.svml_version || this.defaultSvmlVersion;
-    this.validateModel(model);
-    this.validateSvmlVersion(svmlVersion);
-    return withRetry(() => compareSVML(this.api, this.accessToken as string, params), {
+    const finalParams: CompareParams = {
+      ...params, // Spread original_context, svml_a/b, model_a/b, generate_api_output_a/b
+      settings: options?.settings
+    };
+    return withRetry(() => compare(this.api, this.accessToken as string, finalParams), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
       exponential_backoff: this.exponential_backoff,
@@ -236,107 +234,18 @@ export class SvmlClient {
   }
 
   /**
-   * Compares two /generate endpoint outputs.
-   * @param params CompareFromGenerateParams
-   * @returns CompareResponse
-   */
-  async compareFromGenerate(params: CompareFromGenerateParams): Promise<any> {
-    this.checkApiAuth();
-    const model = params.model || this.defaultModel;
-    const svmlVersion = params.svml_version || this.defaultSvmlVersion;
-    this.validateModel(model);
-    this.validateSvmlVersion(svmlVersion);
-    return withRetry(() => compareFromGenerate(this.api, this.accessToken as string, params), {
-      num_retry: this.num_retry,
-      initial_delay: this.initial_delay,
-      exponential_backoff: this.exponential_backoff,
-    });
-  }
-
-  /**
-   * @deprecated Use compareSVML or compareFromGenerate instead.
-   */
-  async compare(params: any): Promise<any> {
-    if ((params as any).svml_a && (params as any).svml_b) {
-      return this.compareSVML(params as CompareSVMLParams);
-    } else if ((params as any).generate_api_output_a && (params as any).generate_api_output_b) {
-      return this.compareFromGenerate(params as CompareFromGenerateParams);
-    } else {
-      throw new Error('Invalid compare params');
-    }
-  }
-
-  /**
-   * Refines a user-supplied SVML string.
-   * @param params RefineSVMLParams
+   * Refines SVML, either directly or from /generate or /compare outputs.
+   * @param params Unified parameters for refinement.
+   * @param options Optional settings for the LLM call.
    * @returns RefineResponse
    */
-  async refineSVML(params: RefineSVMLParams): Promise<any> {
+  async refine(params: Omit<RefineParams, 'settings'>, options?: { settings?: StandardLLMSettings }): Promise<RefineResponse> {
     this.checkApiAuth();
-    this.validateModel(params.model);
-    if (params.svml_version) this.validateSvmlVersion(params.svml_version);
-    return withRetry(() => refine(this.api, this.accessToken as string, params), {
-      num_retry: this.num_retry,
-      initial_delay: this.initial_delay,
-      exponential_backoff: this.exponential_backoff,
-    });
-  }
-
-  /**
-   * Refines SVML from a /generate endpoint output.
-   * @param params RefineFromGenerateParams
-   * @returns RefineResponse
-   */
-  async refineFromGenerate(params: RefineFromGenerateParams): Promise<any> {
-    this.checkApiAuth();
-    this.validateModel(params.model);
-    if (params.svml_version) this.validateSvmlVersion(params.svml_version);
-    return withRetry(() => refineFromGenerate(this.api, this.accessToken as string, params), {
-      num_retry: this.num_retry,
-      initial_delay: this.initial_delay,
-      exponential_backoff: this.exponential_backoff,
-    });
-  }
-
-  /**
-   * Refines SVML from a /compare endpoint output.
-   * @param params RefineFromCompareParams
-   * @returns RefineResponse
-   */
-  async refineFromCompare(params: RefineFromCompareParams): Promise<any> {
-    this.checkApiAuth();
-    this.validateModel(params.model);
-    if (params.svml_version) this.validateSvmlVersion(params.svml_version);
-    return withRetry(() => refineFromCompare(this.api, this.accessToken as string, params), {
-      num_retry: this.num_retry,
-      initial_delay: this.initial_delay,
-      exponential_backoff: this.exponential_backoff,
-    });
-  }
-
-  /**
-   * @deprecated Use refineSVML, refineFromGenerate, or refineFromCompare instead.
-   */
-  async refine(params: RefineSVMLParams | RefineFromGenerateParams | RefineFromCompareParams): Promise<any> {
-    if ((params as any).svml) {
-      return this.refineSVML(params as RefineSVMLParams);
-    } else if ((params as any).generate_api_output) {
-      return this.refineFromGenerate(params as RefineFromGenerateParams);
-    } else if ((params as any).compare_api_output) {
-      return this.refineFromCompare(params as RefineFromCompareParams);
-    } else {
-      throw new Error('Invalid refine params');
-    }
-  }
-
-  /**
-   * Calls the /validate endpoint for SVML syntax validation.
-   */
-  async validate(params: ValidateParams): Promise<ValidateResponse> {
-    this.checkApiAuth();
-    const svmlVersion = (params as any).svml_version || this.defaultSvmlVersion;
-    this.validateSvmlVersion(svmlVersion);
-    return withRetry(() => validate(this.api, this.accessToken as string, params), {
+    const finalParams: RefineParams = {
+        ...params, // Spread svml, original_context, user_additional_context, generate_api_output, etc.
+        settings: options?.settings
+    };
+    return withRetry(() => refine(this.api, this.accessToken as string, finalParams), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
       exponential_backoff: this.exponential_backoff,
@@ -345,15 +254,16 @@ export class SvmlClient {
 
   /**
    * Calls the /correct endpoint for SVML correction.
+   * @param params Parameters for correction (validation_api_output).
+   * @param options Optional settings for the LLM call.
    */
-  async correct(params: CorrectParams): Promise<CorrectResponse> {
+  async correct(params: Pick<CorrectParams, 'validation_api_output'>, options?: { settings?: StandardLLMSettings }): Promise<CorrectResponse> {
     this.checkApiAuth();
-    const model = params.model || this.defaultModel;
-    const svmlVersion = params.svml_version || this.defaultSvmlVersion;
-    this.validateModel(model);
-    this.validateSvmlVersion(svmlVersion);
-    // params must have validation_api_output, svml_version, model
-    return withRetry(() => correct(this.api, this.accessToken as string, params), {
+    const finalParams: CorrectParams = {
+        validation_api_output: params.validation_api_output,
+        settings: options?.settings
+    };
+    return withRetry(() => correct(this.api, this.accessToken as string, finalParams), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
       exponential_backoff: this.exponential_backoff,
@@ -362,21 +272,62 @@ export class SvmlClient {
 
   /**
    * Calls the /analyze endpoint. Requires authorization.
-   * @param params { svml, svml_version, model, dimensions }
-   *        If dimensions is not provided, all available dimensions will be used.
+   * @param params Parameters for analysis (svml, dimensions).
+   * @param options Optional settings for the LLM call.
    * @returns The API response data.
    */
-  async analyze(params: AnalyzeParams): Promise<any> {
+  async analyze(params: Pick<AnalyzeParams, 'svml' | 'dimensions'>, options?: { settings?: StandardLLMSettings }): Promise<AnalyzeResponse> {
     this.checkApiAuth();
-    const model = params.model || this.defaultModel;
-    const svmlVersion = params.svml_version || this.defaultSvmlVersion;
-    this.validateModel(model);
-    this.validateSvmlVersion(svmlVersion);
-    const finalParams = {
-      ...params,
+    const finalParams: AnalyzeParams = {
+      svml: params.svml,
       dimensions: params.dimensions ?? ALL_ANALYZE_DIMENSIONS,
+      settings: options?.settings
     };
     return withRetry(() => analyze(this.api, this.accessToken as string, finalParams), {
+      num_retry: this.num_retry,
+      initial_delay: this.initial_delay,
+      exponential_backoff: this.exponential_backoff,
+    });
+  }
+
+  /**
+   * Calls the /custom endpoint. Requires authorization.
+   * @param params Parameters for the custom prompt (prompt_template_id, template_vars).
+   * @param options Optional settings for the LLM call.
+   * @returns The API response data.
+   */
+  async customPrompt(params: Pick<CustomPromptParams, 'prompt_template_id' | 'template_vars'>, options?: { settings?: StandardLLMSettings }): Promise<CustomPromptResponse> {
+    this.checkApiAuth();
+    const finalParams: CustomPromptParams = {
+      prompt_template_id: params.prompt_template_id,
+      template_vars: params.template_vars,
+      settings: options?.settings
+    };
+    return withRetry(() => customPrompt(this.api, this.accessToken as string, finalParams), {
+      num_retry: this.num_retry,
+      initial_delay: this.initial_delay,
+      exponential_backoff: this.exponential_backoff,
+    });
+  }
+
+  /**
+   * Calls the /validate endpoint. Requires authorization.
+   * @param params Parameters for validation (svml).
+   * @param options Optional settings for the LLM call (though validate typically doesn't use LLM settings like model).
+   * @returns The API response data.
+   */
+  async validate(params: Pick<ValidateParams, 'svml'>, options?: { settings?: StandardLLMSettings }): Promise<ValidateResponse> {
+    this.checkApiAuth();
+    
+    const finalParams: ValidateParams = {
+        svml: params.svml,
+        // Use svml_version from options.settings if provided, otherwise it can be undefined (backend might use a default)
+        svml_version: options?.settings?.svml_version 
+    };
+
+    // This call is to the local validate function from './endpoints/validate.ts'
+    // which should expect ValidateParams (svml: string, svml_version?: string)
+    return withRetry(() => validate(this.api, this.accessToken as string, finalParams), {
       num_retry: this.num_retry,
       initial_delay: this.initial_delay,
       exponential_backoff: this.exponential_backoff,
@@ -431,13 +382,12 @@ export class SvmlClient {
   }
 }
 
-export {
+export type {
   GenerateParams,
-  CompareSVMLParams,
-  CompareFromGenerateParams,
-  RefineSVMLParams,
-  RefineFromGenerateParams,
-  RefineFromCompareParams,
+  CompareParams,
+  CompareResponse,
+  RefineParams,
+  RefineResponse,
   ValidateParams,
   Violation,
   ValidateResponse,
@@ -446,5 +396,10 @@ export {
   AnalyzeParams,
   AnalyzeResponse,
   AnalyzeDimension,
+  CustomPromptParams,
+  CustomPromptResponse
+};
+
+export {
   ALL_ANALYZE_DIMENSIONS
 }; 

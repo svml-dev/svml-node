@@ -1,4 +1,5 @@
 import { AxiosInstance } from 'axios';
+import { StandardLLMSettings } from '../common-types';
 
 /**
  * Parameters for the /correct endpoint.
@@ -7,9 +8,10 @@ export interface CorrectParams {
   /** The full output from the /validate endpoint. */
   validation_api_output: any;
   /** The SVML version to use. */
-  svml_version: string;
+  // svml_version: string;
   /** The model to use for correction. */
-  model: string;
+  // model: string;
+  settings?: StandardLLMSettings;
 }
 
 /**

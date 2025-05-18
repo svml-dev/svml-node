@@ -1,4 +1,5 @@
 import { AxiosInstance } from 'axios';
+import { StandardLLMSettings } from '../common-types';
 
 /**
  * Parameters for the /generate endpoint.
@@ -7,9 +8,10 @@ export interface GenerateParams {
   /** The natural language context to generate SVML from. */
   context: string;
   /** The SVML version to use (e.g., '1.2.2'). */
-  svml_version: string;
+  // svml_version: string;
   /** The model to use for generation (e.g., 'gpt-4.1-mini'). */
-  model: string;
+  // model: string;
+  settings?: StandardLLMSettings;
 }
 
 /**
@@ -37,6 +39,8 @@ export async function generate(
   token: string,
   params: GenerateParams
 ): Promise<GenerateResponse> {
+  console.log('[endpoints/generate.ts] params being sent to api.post:', JSON.stringify(params, null, 2));
+
   const response = await api.post(
     '/generate',
     params,
