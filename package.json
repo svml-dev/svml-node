@@ -1,6 +1,6 @@
 {
   "name": "svml",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "files": [
@@ -11,8 +11,11 @@
     "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
-  "devDependencies": {
-    "@types/jest": "^29.5.14",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "jwt-decode": "^4.0.0"
+  },
+  "devDependencies": {    
     "@types/node": "^22.15.18",
     "typescript": "^5.0.0"
   }

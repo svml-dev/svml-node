@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-const pkg = require('../../package.json');
+const pkg = require('../package.json');
 import { generate, GenerateParams, GenerateResponse } from './endpoints/generate';
 import {
   compare,
