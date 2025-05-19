@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
-const pkg = require('../package.json');
+import { getPackageInfo } from './utils/package-info';
+const pkg = getPackageInfo();
 import { generate, GenerateParams, GenerateResponse } from './endpoints/generate';
 import {
   compare,
@@ -25,7 +26,7 @@ import {
 import { authenticateWithApiKey } from './endpoints/auth';
 import { withRetry } from './utils/retry';
 import { analyze, AnalyzeParams, AnalyzeResponse, AnalyzeDimension, ALL_ANALYZE_DIMENSIONS } from './endpoints/analyze';
-import { customPrompt, CustomPromptParams, CustomPromptResponse } from './endpoints/custom_prompts';
+import { customPrompt, CustomPromptParams, CustomPromptResponse, customPromptStream, processSSEStream } from './endpoints/custom_prompts';
 import { UserId } from './shared-svml';
 import { fetchModels, fetchSvmlVersions, ModelInfo } from './endpoints/metadata';
 import { StandardLLMSettings } from './common-types';
@@ -308,6 +309,49 @@ export class SvmlClient {
       initial_delay: this.initial_delay,
       exponential_backoff: this.exponential_backoff,
     });
+  }
+
+  /**
+   * Calls the /custom-stream endpoint for streaming responses. Requires authorization.
+   * @param params Parameters for the custom prompt with streaming callbacks.
+   * @param options Optional settings for the LLM call.
+   * @returns A promise that resolves to a ReadableStream or void if using callbacks.
+   */
+  async customPromptStream(
+    params: Pick<CustomPromptParams, 'prompt_template_id' | 'template_vars'> & {
+      onChunk?: (chunk: string) => void;
+      onError?: (error: Error) => void;
+      onComplete?: () => void;
+    }, 
+    options?: { settings?: StandardLLMSettings }
+  ): Promise<ReadableStream<Uint8Array> | void> {
+    this.checkApiAuth();
+    
+    const { onChunk, onError, onComplete, ...baseParams } = params;
+    
+    const finalParams = {
+      ...baseParams,
+      settings: options?.settings,
+      onChunk,
+      onError,
+      onComplete
+    };
+    
+    const stream = await customPromptStream(this.api, this.accessToken as string, finalParams);
+    
+    // If callbacks are provided, handle the stream processing internally
+    if (onChunk) {
+      processSSEStream(
+        stream,
+        onChunk,
+        onError || ((error: Error) => console.error('Streaming error:', error)),
+        onComplete
+      );
+      return;
+    }
+    
+    // Otherwise return the raw stream for manual handling
+    return stream;
   }
 
   /**
